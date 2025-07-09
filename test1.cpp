@@ -13,5 +13,6 @@ int main() {
     cout << "请输入一个正整数 n：";
     cin >> n;
     cout << "斐波那契第 " << n << " 项是：" << fibonacci(n) << endl;
+    cout <<"用于测试分支";
     return 0;
 }
