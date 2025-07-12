@@ -80,10 +80,18 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',  # 用 mysql
+        'NAME': 'popquiz',                     # 你的数据库名
+        'USER': 'root',                        # 数据库用户名
+        'PASSWORD': 'ljj20040113',           # 数据库密码
+        'HOST': '127.0.0.1',                   # 本地开发用
+        'PORT': '3306',                        # MySQL 默认端口
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
+
 
 
 # Password validation
