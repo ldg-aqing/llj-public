@@ -1,0 +1,6 @@
+<h1>Uploaded Materials</h1>
+<ul>
+  {% for material in materials %}
+    <li>{{ material.title }} - {{ material.file_type }}-{{ material.file }}</li>
+  {% endfor %}
+</ul>
