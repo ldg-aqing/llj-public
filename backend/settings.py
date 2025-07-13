@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-6xc!ihzlh$^a-w1)4r(2g*ftw=!)(qh2es3wfln9na!^7i&+ax
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -83,9 +83,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # 用 mysql
         'NAME': 'popquiz',                     # 你的数据库名
-        'USER': 'root',                        # 数据库用户名
+        'USER': 'remote_user',                        # 数据库用户名
         'PASSWORD': 'ljj20040113',           # 数据库密码
-        'HOST': '127.0.0.1',                   # 本地开发用
+        'HOST': '150.158.10.177',
         'PORT': '3306',                        # MySQL 默认端口
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
