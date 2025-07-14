@@ -17,24 +17,21 @@ def register_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
         try:
             user = Users.objects.get(username=username, password=password)
             request.session['user_id'] = user.id
-            request.session['username'] = user.username
             request.session['role'] = user.role
 
-            # 身份判断跳转
             if user.role == 'ORGANIZER':
-                return redirect('organizer')
+                return redirect('/users/organizer/')
             elif user.role == 'SPEAKER':
-                return redirect('speaker')
+                return redirect('/users/speaker/')
             elif user.role == 'AUDIENCE':
-                return redirect('audience')
-            else:
-                messages.error(request, '未知角色')
-                return redirect('login')
+                return redirect('/users/audience/')
         except Users.DoesNotExist:
-            messages.error(request, '用户名或密码错误')
+            messages.error(request, "用户名或密码错误")
+
     return render(request, 'login.html')

@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<h1>欢迎进入演讲者首页</h1>
-</body>
-</html>
+<h2>欢迎，演讲者 {{ user.username }}</h2>
+<h3>你的演讲列表：</h3>
+
+<ul>
+    {% for p in presentations %}
+        <li>
+            <strong>{{ p.title }}</strong> - 状态：{{ p.get_status_display }} <br>
+            描述：{{ p.description }}<br>
+            时间：{{ p.start_time }} ~ {{ p.end_time }}
+        </li>
+    {% empty %}
+        <li>暂无演讲内容。</li>
+    {% endfor %}
+</ul>
