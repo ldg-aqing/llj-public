@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 
 from material.views import material_list, upload_material
 from django.conf import settings
@@ -10,6 +11,8 @@ urlpatterns = [
     path('', include('core.urls')),  # 把 core 的 URL 合并进来
     path('materials/', material_list, name='material_list'),
     path('upload/', upload_material, name='upload'),
+    path('users/', include('users.urls')),
+    path('', lambda request: redirect('/users/login')),  # 访问 / 自动跳转到登录页
 ]
 
 # 显示上传的文件
