@@ -1,51 +1,8 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block title %}统一登录{% endblock %}
-{% block content %}
-<link rel="stylesheet" href="{% static 'login.css' %}">
-
-<div class="login-container">
-    <h2>POP Quiz 统一登录</h2>
-    
-    <!-- 身份选择选项卡 -->
-    <div class="role-tabs">
-        <button class="tab active" data-role="speaker">演讲者</button>
-        <button class="tab" data-role="organizer">组织者</button>
-        <button class="tab" data-role="listener">听众</button>
-    </div>
-
-    <!-- 统一登录表单 -->
-    <form id="unifiedLoginForm">
-        <input type="hidden" name="role" value="speaker"> <!-- 默认演讲者 -->
-        
-        <div class="form-group">
-            <input type="text" name="username" placeholder="用户名" required>
-        </div>
-        <div class="form-group">
-            <input type="password" name="password" placeholder="密码" required>
-        </div>
-        
-        <button type="submit">登录</button>
-        <p class="register-link">没有账号？<a href="{% url 'register' %}">立即注册</a></p>
-    </form>
-</div>
-
-<script>
-    // 选项卡切换逻辑
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            document.querySelector('input[name="role"]').value = tab.dataset.role;
-        });
-    });
-
-    // 表单提交逻辑
-    document.getElementById('unifiedLoginForm').onsubmit = function(e) {
-        e.preventDefault();
-        const role = document.querySelector('input[name="role"]').value;
-        alert(`即将以${role}身份登录\n（实际项目需后端验证后跳转）`);
-        // 实际开发中此处应发送AJAX请求到后端验证
-    };
-</script>
-{% endblock %}
+<h2>用户登录</h2>
+<form method="post">
+    {% csrf_token %}
+    <label>用户名：</label><input type="text" name="username"><br>
+    <label>密码：</label><input type="password" name="password"><br>
+    <button type="submit">登录</button>
+</form>
+<p>没有账号？<a href="{% url 'register' %}">去注册</a></p>

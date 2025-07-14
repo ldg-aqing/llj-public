@@ -1,42 +1,7 @@
-{% extends 'base.html' %}
-{% block title %}注册账号{% endblock %}
-
-{% block content %}
-<div class="login-box">
-  <h2>注册新账号</h2>
-
-  <form method="post" action="{% url 'register' %}">
-    {% csrf_token %}
-
-    <!-- 用户名输入 -->
-    <div class="input-box">
-      <input type="text" name="username" required>
-      <label>用户名</label>
-    </div>
-
-    <!-- 邮箱输入 -->
-    <div class="input-box">
-      <input type="email" name="email" required>
-      <label>邮箱</label>
-    </div>
-
-    <!-- 密码输入 -->
-    <div class="input-box">
-      <input type="password" name="password1" required>
-      <label>密码</label>
-    </div>
-
-    <!-- 确认密码 -->
-    <div class="input-box">
-      <input type="password" name="password2" required>
-      <label>确认密码</label>
-    </div>
-
-    <button type="submit">注册</button>
-
-    <div class="register-link">
-      已有账号？<a href="{% url 'login' %}">立即登录</a>
-    </div>
-  </form>
-</div>
-{% endblock %}
+<h2>用户注册</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">注册</button>
+</form>
+<a href="{% url 'login' %}">已有账号？登录</a>
