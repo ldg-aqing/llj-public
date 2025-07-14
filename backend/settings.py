@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,7 +40,15 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'core',
-    'material'
+    'material',
+    'users',
+    'quiz',
+    'manager',
+    'record',
+    'show',
+    'comment',
+    'ai'
+
 ]
 
 MIDDLEWARE = [
@@ -94,6 +102,29 @@ DATABASES = {
 }
 
 
+# 静态文件URL前缀（浏览器访问路径）
+STATIC_URL = '/static/'
+# 静态文件实际存放目录（指向项目根目录的static文件夹）
+STATICFILES_DIRS = [
+    os.path.join(os.path.dirname(BASE_DIR), 'static'),  # 根据截图，static在项目根目录
+]
+
+# 模板配置（确保已存在）
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',  # 必须保留
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # 指向模板目录
+        'APP_DIRS': True,  # 允许从应用内查找模板
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

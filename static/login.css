@@ -1,0 +1,53 @@
+/* static/users/login.css */
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 8px;
+    background: #2d2d2d;
+}
+
+.role-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444;
+}
+
+.tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    background: transparent;
+    color: #aaa;
+    border: none;
+    cursor: pointer;
+}
+
+.tab.active {
+    color: #fff;
+    border-bottom: 2px solid #4CAF50;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    background: #3d3d3d;
+    border: 1px solid #444;
+    color: white;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 15px;
+    color: #aaa;
+}
