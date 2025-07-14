@@ -6,6 +6,8 @@ from material.views import material_list, upload_material
 from django.conf import settings
 from django.conf.urls.static import static
 
+from users.views import login_view, register_view
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),  # 把 core 的 URL 合并进来

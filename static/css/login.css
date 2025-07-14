@@ -1,0 +1,106 @@
+.login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 10px;
+    background: #2d2d2d;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.login-title {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 25px;
+    font-size: 24px;
+}
+
+.role-tabs {
+    display: flex;
+    margin-bottom: 25px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: #3d3d3d;
+}
+
+.tab {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    background: transparent;
+    color: #aaa;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.tab:hover {
+    background: #4d4d4d;
+}
+
+.tab.active {
+    color: #fff;
+    background: #4CAF50;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ddd;
+    font-size: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    background: #3d3d3d;
+    border: 1px solid #444;
+    color: white;
+    font-size: 14px;
+    transition: border 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+button[type="submit"]:hover {
+    background: #3e8e41;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #aaa;
+    font-size: 14px;
+}
+
+.register-link a {
+    color: #4CAF50;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.register-link a:hover {
+    color: #3e8e41;
+}
+
