@@ -1,0 +1,46 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+<div class="login-container">
+    <h2 class="login-title">用户登录</h2>
+
+
+    <div class="role-tabs">
+        <button type="button" class="tab active" data-role="speaker">演讲者</button>
+        <button type="button" class="tab" data-role="organizer">组织者</button>
+        <button type="button" class="tab" data-role="audience">听众</button>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="role" value="speaker">
+
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" name="username" placeholder="请输入用户名">
+        </div>
+
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" name="password" placeholder="请输入密码">
+        </div>
+
+        <button type="submit">登 录</button>
+    </form>
+
+    <p class="register-link">没有账号？<a href="{% url 'register' %}">立即注册</a></p>
+</div>
+
+<script>
+    // 切换角色选项卡
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // 移除所有选项卡的active类
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            // 为当前点击的选项卡添加active类
+            this.classList.add('active');
+            // 更新隐藏的role字段值
+            document.querySelector('input[name="role"]').value = this.dataset.role;
+        });
+    });
+</script>

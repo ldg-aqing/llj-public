@@ -1,0 +1,23 @@
+
+{% load static %} <!-- 必须放在首行 -->
+
+{% block content %}
+<!-- 引入CSS文件 -->
+<link rel="stylesheet" href="{% static 'css/register.css' %}">
+
+<!-- 注册表单容器 -->
+<div class="registration-container">
+    <h2 class="registration-title">用户注册</h2>
+
+    <!-- Django自动生成表单 -->
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- 自动渲染所有字段 -->
+        <button type="submit">注册</button>
+    </form>
+
+    <p class="login-link">
+        <a href="{% url 'login' %}">已有账号？立即登录</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+/* 注册页专属样式 - 保持与登录页一致的暗色风格 */
+.registration-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background: #2d2d2d;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.registration-title {
+    text-align: center;
+    color: #4CAF50; /* 绿色标题 */
+    margin-bottom: 25px;
+}
+
+/* 适配Django自动生成的表单结构 */
+.registration-container form p {
+    margin-bottom: 20px;
+}
+
+.registration-container label {
+    display: block;
+    color: #ddd;
+    margin-bottom: 8px;
+}
+
+.registration-container input {
+    width: 100%;
+    padding: 12px;
+    background: #3d3d3d;
+    border: 1px solid #444;
+    color: white;
+}
+
+.registration-container button {
+    width: 100%;
+    padding: 12px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.login-link {
+    text-align: center;
+    color: #aaa;
+    margin-top: 20px;
+}
