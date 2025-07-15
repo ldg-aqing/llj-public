@@ -2,10 +2,15 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>上传素材</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>演讲者界面</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
 
         body {
             background-color: #f5f5f5;
@@ -21,6 +26,7 @@
             overflow: hidden;
         }
 
+        /* 头部信息区 - 修改部分 */
         .header {
             padding: 15px;
             border-bottom: 1px solid #eee;
@@ -39,7 +45,6 @@
             display: flex;
             align-items: center;
         }
-
         .back-btn:hover {
             background-color: #f0f0f0;
             border-radius: 4px;
@@ -54,9 +59,18 @@
             font-size: 14px;
         }
 
-        .info-label { color: #666; display: inline-block; width: 80px; }
-        .info-value { color: #333; font-weight: 500; }
+        .info-label {
+            color: #666;
+            display: inline-block;
+            width: 80px;
+        }
 
+        .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* 内容上传区 */
         .upload-section {
             padding: 20px;
             border-bottom: 1px solid #eee;
@@ -73,12 +87,25 @@
             transition: all 0.3s;
         }
 
-        .add-btn { background: #4285f4; color: white; }
-        .add-btn:hover { background: #3367d6; }
+        .add-btn {
+            background: #4285f4;
+            color: white;
+        }
 
-        .submit-btn { background: #34a853; color: white; }
-        .submit-btn:hover { background: #2d9249; }
+        .add-btn:hover {
+            background: #3367d6;
+        }
 
+        .submit-btn {
+            background: #34a853;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background: #2d9249;
+        }
+
+        /* 内容列表区 */
         .content-list {
             padding: 15px;
         }
@@ -107,7 +134,10 @@
             margin-bottom: 10px;
         }
 
-        .content-name { font-size: 15px; color: #333; }
+        .content-name {
+            font-size: 15px;
+            color: #333;
+        }
 
         .content-actions {
             display: flex;
@@ -132,62 +162,60 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-
-        .upload-form {
-            padding: 20px;
-            text-align: center;
-        }
-
-        .upload-form h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        .upload-form form {
-            margin-top: 10px;
-        }
-
-        .upload-form button {
-            margin-top: 10px;
-            padding: 8px 16px;
-            font-size: 15px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 返回按钮 + 演讲信息 -->
+        <!-- 头部信息区 - 修改为按钮 -->
         <div class="header">
-            <button class="back-btn" onclick="window.location.href='/presentations/speaker/'">← 返回演讲者主页</button>
+            <button class="back-btn">← 返回</button>
             <div class="presentation-info">
-                <div class="info-item"><span class="info-label">演讲名称：</span><span class="info-value" id="presentation-name">加载中...</span></div>
-                <div class="info-item"><span class="info-label">演讲者：</span><span class="info-value" id="presentation-speaker">加载中...</span></div>
-                <div class="info-item"><span class="info-label">组织者：</span><span class="info-value" id="presentation-organizer">加载中...</span></div>
-                <div class="info-item"><span class="info-label">听众人数：</span><span class="info-value" id="presentation-audience">加载中...</span></div>
-                <div class="info-item"><span class="info-label">演讲状态：</span><span class="info-value" id="presentation-status">加载中...</span></div>
+                <div class="info-item">
+                    <span class="info-label">演讲名称：</span>
+                    <span class="info-value" id="presentation-name">加载中...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">演讲者：</span>
+                    <span class="info-value" id="presentation-speaker">加载中...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">组织者：</span>
+                    <span class="info-value" id="presentation-organizer">加载中...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">听众人数：</span>
+                    <span class="info-value" id="presentation-audience">加载中...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">演讲状态：</span>
+                    <span class="info-value" id="presentation-status">加载中...</span>
+                </div>
             </div>
         </div>
 
-        <!-- 上传表单（原始功能） -->
-        <div class="upload-form">
-            <h2>上传文件（PDF / PPTX / TXT）</h2>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">上传</button>
-            </form>
+        <!-- 内容上传区 -->
+        <div class="upload-section">
+            <button class="action-btn add-btn" id="addContent">添加内容</button>
+            <button class="action-btn submit-btn" id="submitAll">提交所有内容</button>
         </div>
 
-
+        <!-- 内容列表区 -->
         <div class="content-list">
             <div class="list-title">已上传内容列表</div>
+
+            <!-- 空状态 -->
             <div class="empty-tip" id="emptyTip">暂无上传内容</div>
+
+            <!-- 内容列表（初始为空，JS动态添加） -->
             <div id="contentItems"></div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        // 模拟从后端获取演讲信息
+        document.addEventListener('DOMContentLoaded', function() {
+            // 这里应该是AJAX请求后端API获取真实数据
+            // 以下是模拟数据
             const presentationData = {
                 name: "人工智能前沿技术分享",
                 speaker: "张教授",
@@ -196,21 +224,30 @@
                 status: "未开始"
             };
 
+            // 填充演讲信息
             document.getElementById('presentation-name').textContent = presentationData.name;
             document.getElementById('presentation-speaker').textContent = presentationData.speaker;
             document.getElementById('presentation-organizer').textContent = presentationData.organizer;
             document.getElementById('presentation-audience').textContent = presentationData.audience + '人';
             document.getElementById('presentation-status').textContent = presentationData.status;
 
-            document.getElementById('addContent').addEventListener('click', function () {
+            // 添加内容按钮事件
+            document.getElementById('addContent').addEventListener('click', function() {
                 addNewContent("新增内容_" + (document.querySelectorAll('.content-item').length + 1));
             });
 
-            document.getElementById('submitAll').addEventListener('click', function () {
+            // 提交按钮事件
+            document.getElementById('submitAll').addEventListener('click', function() {
                 alert('提交功能需对接后端API');
+            });
+
+            // 返回按钮事件
+            document.querySelector('.back-btn').addEventListener('click', function() {
+                window.history.back(); // 或指定跳转路径
             });
         });
 
+        // 添加新内容到列表
         function addNewContent(contentName) {
             const emptyTip = document.getElementById('emptyTip');
             if (emptyTip) emptyTip.style.display = 'none';
@@ -226,7 +263,8 @@
                 </div>
             `;
 
-            newItem.querySelector('.delete-btn').addEventListener('click', function () {
+            // 添加删除事件
+            newItem.querySelector('.delete-btn').addEventListener('click', function() {
                 if (confirm('确定删除此内容？')) {
                     newItem.remove();
                     if (document.querySelectorAll('.content-item').length === 0) {
@@ -235,7 +273,8 @@
                 }
             });
 
-            newItem.querySelector('.view-btn').addEventListener('click', function () {
+            // 添加查看事件
+            newItem.querySelector('.view-btn').addEventListener('click', function() {
                 alert('查看内容: ' + contentName);
             });
 

@@ -13,28 +13,32 @@ def register_view(request):
             return redirect('login')
     else:
         form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'log/register.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
         try:
             user = User.objects.get(username=username, password=password)
             request.session['user_id'] = user.id
-            request.session['username'] = user.username
             request.session['role'] = user.role
 
-            # 身份判断跳转
             if user.role == 'ORGANIZER':
-                return redirect('organizer')
-            elif user.role == 'SPEAKER':
-                return redirect('speaker')
+                return redirect('/users/organizer/')
+            if user.role == 'SPEAKER':
+                    return redirect('/presentations/speaker/')
             elif user.role == 'AUDIENCE':
-                return redirect('audience')
-            else:
-                messages.error(request, '未知角色')
-                return redirect('login')
+                return redirect('/users/audience/')
         except User.DoesNotExist:
-            messages.error(request, '用户名或密码错误')
-    return render(request, 'login.html')
+            messages.error(request, "用户名或密码错误")
+
+    return render(request, 'log/login.html')
+
+def audience_view(request):
+    return render(request, 'users/audience.html')  # 确保 templates 中有 audience.html 页面
+
+
+def speaker_view(request):
+    return render(request, 'users/speaker.html')
