@@ -6,7 +6,7 @@ urlpatterns = [
     path('register/', register_view, name='register'),
     path('login/', login_view, name='login'),
 
-    path('organizer/', lambda request: render(request, 'organizer.html'), name='organizer'),
-    path('speaker/', lambda request: render(request, 'speaker.html'), name='speaker'),
-    path('audience/', lambda request: render(request, 'audience.html'), name='audience'),
+    path('organizer/', lambda request: render(request, 'users/organizer.html'), name='organizer'),
+    path('speaker/', lambda request: render(request, 'users/speaker.html'), name='speaker'),
+    path('audience/', lambda request: render(request, 'users/audience.html'), name='audience'),
 ]

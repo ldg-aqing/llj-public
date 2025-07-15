@@ -3,6 +3,7 @@ from django.contrib import messages
 from .forms import RegisterForm, LoginForm
 from .models import User
 
+
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -13,7 +14,8 @@ def register_view(request):
             return redirect('login')
     else:
         form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'log/register.html', {'form': form})
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -37,4 +39,9 @@ def login_view(request):
                 return redirect('login')
         except User.DoesNotExist:
             messages.error(request, '用户名或密码错误')
-    return render(request, 'login.html')
+    return render(request, 'log/login.html')
+
+
+from django.shortcuts import render
+
+

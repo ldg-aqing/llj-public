@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>演讲者主页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        /* 头部信息区 */
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-info {
+            flex-grow: 1;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 12px 15px;
+            border-radius: 5px;
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* 演讲列表区域 */
+        .presentation-list {
+            padding: 15px;
+        }
+
+        .list-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            padding-left: 5px;
+        }
+
+        .presentation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .presentation-details {
+            flex: 1;
+        }
+
+        .presentation-name {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .presentation-status {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .enter-btn {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .enter-btn:hover {
+            background-color: #3367d6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部信息区 -->
+        <div class="header">
+            <div class="user-info">你好！演讲者张教授</div>
+        </div>
+
+        <!-- 演讲列表区 -->
+        <div class="presentation-list">
+            <div class="list-title">我的演讲列表</div>
+
+            <!-- 演讲记录示例1 - 这个将跳转到目标页面 -->
+            <div class="presentation-item">
+                <div class="presentation-details">
+                    <div class="presentation-name">人工智能前沿技术分享</div>
+                    <div class="presentation-status">状态：未开始</div>
+                </div>
+               <button class="enter-btn" onclick="window.location.href='before/'">进入</button>
+            </div>
+
+            <!-- 其他演讲记录示例 -->
+            <div class="presentation-item">
+                <div class="presentation-details">
+                    <div class="presentation-name">机器学习实践指南</div>
+                    <div class="presentation-status">状态：进行中</div>
+                </div>
+                <button class="enter-btn">进入</button>
+            </div>
+
+            <div class="presentation-item">
+                <div class="presentation-details">
+                    <div class="presentation-name">深度学习基础讲座</div>
+                    <div class="presentation-status">状态：已结束</div>
+                </div>
+                <button class="enter-btn">进入</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 其他按钮保持原有提示功能
+        document.querySelectorAll('.enter-btn:not([onclick])').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const presentationName = this.closest('.presentation-item')
+                    .querySelector('.presentation-name').textContent;
+                alert(`测试专用：仅第一个"进入"按钮有实际跳转功能\n\n${presentationName}的跳转功能待实现`);
+            });
+        });
+    </script>
+</body>
+</html>
