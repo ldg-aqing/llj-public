@@ -7,7 +7,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),  # 把 core 的 URL 合并进来
     path('materials/', material_list, name='material_list'),
     path('upload/', upload_material, name='upload'),
 ]

@@ -39,15 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'core',
     'material',
     'users',
-    'quiz',
-    'manager',
-    'record',
-    'show',
-    'comment',
-    'ai'
+    'quizzes',
+    'uploads',
+    'feedback',
+    'presentations',
+    'discussions'
+
 
 ]
 
