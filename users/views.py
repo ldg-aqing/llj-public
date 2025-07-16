@@ -26,7 +26,7 @@ def login_view(request):
             request.session['role'] = user.role
 
             if user.role == 'ORGANIZER':
-                return redirect('/users/organizer/')
+                return redirect('/presentations/organizer/')
             if user.role == 'SPEAKER':
                     return redirect('/presentations/speaker/')
             elif user.role == 'AUDIENCE':

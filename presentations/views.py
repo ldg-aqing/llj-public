@@ -21,6 +21,25 @@ def speaker_home(request):
         'presentations': presentations,
     })
 
+def organizer_home(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('/users/login/')  # 未登录跳转
+
+    # 获取当前登录用户
+    try:
+        user = User.objects.get(id=user_id, role='ORGANIZER')
+    except User.DoesNotExist:
+        return render(request, 'error.html', {'message': '用户不存在或不是演讲者'})
+
+    # 获取该演讲者的所有演讲
+    presentations = Presentation.objects.filter(organizer=user)
+
+    return render(request, 'users/organizer.html', {
+        'user': user,
+        'presentations': presentations,
+    })
+
 def start_presentation(request, pk):
     presentation = get_object_or_404(Presentation, pk=pk)
 
