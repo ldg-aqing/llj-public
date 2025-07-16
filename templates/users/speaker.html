@@ -27,7 +27,6 @@
             margin: 0 auto;
         }
 
-        /* 头部信息区 */
         .header {
             display: flex;
             align-items: center;
@@ -46,7 +45,6 @@
             font-weight: 500;
         }
 
-        /* 演讲列表区域 */
         .presentation-list {
             padding: 15px;
         }
@@ -100,50 +98,33 @@
     <div class="container">
         <!-- 头部信息区 -->
         <div class="header">
-            <div class="user-info">你好！演讲者张教授</div>
+                            <button class="enter-btn" type="button" onclick="window.location.href='/users/login/'" style="margin-left: 10px;">
+        返回登录
+    </button>
+            <div class="user-info">你好！演讲者 {{ user.username }}</div>
         </div>
 
         <!-- 演讲列表区 -->
-        <div class="presentation-list">
-            <div class="list-title">我的演讲列表</div>
+      <div class="presentation-list">
+    <div class="list-title">我的演讲列表</div>
 
-            <!-- 演讲记录示例1 - 这个将跳转到目标页面 -->
-            <div class="presentation-item">
-                <div class="presentation-details">
-                    <div class="presentation-name">人工智能前沿技术分享</div>
-                    <div class="presentation-status">状态：未开始</div>
-                </div>
-               <button class="enter-btn" onclick="window.location.href='before/'">进入</button>
-            </div>
-
-            <!-- 其他演讲记录示例 -->
-            <div class="presentation-item">
-                <div class="presentation-details">
-                    <div class="presentation-name">机器学习实践指南</div>
-                    <div class="presentation-status">状态：进行中</div>
-                </div>
-                <button class="enter-btn">进入</button>
-            </div>
-
-            <div class="presentation-item">
-                <div class="presentation-details">
-                    <div class="presentation-name">深度学习基础讲座</div>
-                    <div class="presentation-status">状态：已结束</div>
-                </div>
-                <button class="enter-btn">进入</button>
-            </div>
+   {% for presentation in presentations %}
+    <div class="presentation-item">
+        <div class="presentation-details">
+            <div class="presentation-name">{{ presentation.title }}</div>
+            <div class="presentation-status">状态：{{ presentation.get_status_display }}</div>
         </div>
-    </div>
 
-    <script>
-        // 其他按钮保持原有提示功能
-        document.querySelectorAll('.enter-btn:not([onclick])').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const presentationName = this.closest('.presentation-item')
-                    .querySelector('.presentation-name').textContent;
-                alert(`测试专用：仅第一个"进入"按钮有实际跳转功能\n\n${presentationName}的跳转功能待实现`);
-            });
-        });
-    </script>
+        {% if presentation.status == 'PENDING' %}
+            <button class="enter-btn" type="button" onclick="window.location.href='/upload/'">开始演讲</button>
+        {% elif presentation.status == 'LIVE' %}
+            <button class="enter-btn" disabled>进行中</button>
+        {% elif presentation.status == 'FINISHED' %}
+            <a href="#" class="enter-btn">查看</a>
+        {% endif %}
+    </div>
+{% endfor %}
+</div>
+    </div>
 </body>
 </html>
