@@ -1,12 +1,10 @@
 from django.urls import path
-from .views import register_view, login_view
-from django.shortcuts import render
+from . import views
 
 urlpatterns = [
-    path('register/', register_view, name='register'),
-    path('login/', login_view, name='login'),
-
-    path('organizer/', lambda request: render(request, 'users/organizer.html'), name='organizer'),
-    path('speaker/', lambda request: render(request, 'users/speaker.html'), name='speaker'),
-    path('audience/', lambda request: render(request, 'users/audience.html'), name='audience'),
+    path('login/', views.login_view, name='login'),
+    path('register/', views.register_view, name='register'),
+    path('speaker/', views.speaker_view, name='speaker_view'),
+    path('audience/', views.audience_view, name='audience_view'),
+path('organizer/', views.organizer_view, name='organizer_view'),
 ]

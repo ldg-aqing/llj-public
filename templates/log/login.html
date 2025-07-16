@@ -4,6 +4,14 @@
 <div class="login-container">
     <h2 class="login-title">用户登录</h2>
 
+    <!-- 🚨 登录失败提示信息 -->
+    {% if messages %}
+        <ul class="error-messages">
+            {% for message in messages %}
+                <li style="color:red;">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
     <div class="role-tabs">
         <button type="button" class="tab active" data-role="speaker">演讲者</button>
