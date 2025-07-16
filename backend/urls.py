@@ -17,6 +17,7 @@ urlpatterns = [
     path('upload/', upload_material, name='upload'),
     path('users/', include('users.urls')),
     path('presentations/', include('presentations.urls')),
+    path('material/', include('material.urls')),
     path('', lambda request: redirect('/users/login')),  # 访问 / 自动跳转到登录页
 ]
 
