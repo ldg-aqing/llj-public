@@ -1,10 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组织者主页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-info {
+            flex-grow: 1;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 12px 15px;
+            border-radius: 5px;
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* 新增演讲创建区域 */
+        .create-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f9f9f9;
+        }
+
+        .create-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .create-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .presentation-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .create-btn {
+            background-color: #34a853;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .create-btn:hover {
+            background-color: #2d9249;
+        }
+
+        .presentation-list {
+            padding: 15px;
+        }
+
+        .list-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            padding-left: 5px;
+        }
+
+        .presentation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .presentation-details {
+            flex: 1;
+        }
+
+        .presentation-name {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .presentation-status {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .enter-btn {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .enter-btn:hover {
+            background-color: #3367d6;
+        }
+    </style>
 </head>
 <body>
-<h1>欢迎进入组织者首页</h1>
+    <div class="container">
+        <!-- 头部信息区 -->
+        <div class="header">
+            <button class="enter-btn" type="button" onclick="window.location.href='/users/login/'">返回登录</button>
+            <div class="user-info">你好！组织者 {{ user.username }}</div>
+        </div>
+
+        <!-- 新增演讲创建区域 -->
+        <div class="create-section">
+            <div class="create-title">创建新演讲</div>
+            <form class="create-form" method="post" action="/presentations/create/">
+                {% csrf_token %}
+                <input type="text" name="title" class="presentation-input" placeholder="输入演讲名称" required>
+                <button type="submit" class="create-btn">创建</button>
+            </form>
+        </div>
+
+        <!-- 演讲列表区 -->
+        <div class="presentation-list">
+            <div class="list-title">我的演讲列表</div>
+
+            {% for presentation in presentations %}
+            <div class="presentation-item">
+                <div class="presentation-details">
+                    <div class="presentation-name">{{ presentation.title }}</div>
+                    <div class="presentation-status">状态：{{ presentation.get_status_display }}</div>
+                </div>
+
+                {% if presentation.status == 'PENDING' %}
+                    <button class="enter-btn" type="button" onclick="window.location.href='/presentations/manage/{{ presentation.id }}/'">管理</button>
+                {% elif presentation.status == 'LIVE' %}
+                    <button class="enter-btn" disabled>进行中</button>
+                {% elif presentation.status == 'FINISHED' %}
+                    <a href="/presentations/report/{{ presentation.id }}/" class="enter-btn">查看报告</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // 可以添加前端验证或AJAX提交逻辑
+        document.querySelector('.create-form').addEventListener('submit', function(e) {
+            const input = this.querySelector('.presentation-input');
+            if (input.value.trim() === '') {
+                e.preventDefault();
+                alert('请输入演讲名称');
+            }
+        });
+    </script>
 </body>
 </html>
