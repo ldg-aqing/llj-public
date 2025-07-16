@@ -116,7 +116,7 @@
         </div>
 
         {% if presentation.status == 'PENDING' %}
-            <button class="enter-btn" type="button" onclick="window.location.href='/upload/'">开始演讲</button>
+            <button class="enter-btn" type="button" onclick="window.location.href='{% url 'upload_material' presentation.speaker.id presentation.id %}'">开始演讲</button>
         {% elif presentation.status == 'LIVE' %}
             <button class="enter-btn" disabled>进行中</button>
         {% elif presentation.status == 'FINISHED' %}

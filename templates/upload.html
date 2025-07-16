@@ -198,34 +198,34 @@
         <!-- 严格按图片样式的上传表单 -->
         <div class="upload-form">
             <h2 class="upload-title">上传文件（PDF / PPTX / TXT）</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
 
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
+    <div class="form-row">
+        <input type="text" name="title" class="text-input">
+    </div>
 
-                <!-- Title 输入框 -->
-                <div class="form-row">
-                    <label class="form-label">Title:</label>
-                    <input type="text" name="title" class="text-input">
-                </div>
+    <div class="form-row">
+        <label class="form-label">File:</label>
+        <div class="file-input-container">
+            <span class="file-input-button">选择文件</span>
+            <span class="file-input-hint">未选择文件</span>
+            <input type="file" id="file-input" name="file" accept=".pdf,.pptx,.txt">
+        </div>
+    </div>
 
-                <!-- File 选择框 -->
-                <div class="form-row">
-                    <label class="form-label">File:</label>
-                    <div class="file-input-container">
-                        <span class="file-input-button">选择文件</span>
-                        <span class="file-input-hint">未选择文件</span>
-                        <input type="file" id="file-input" name="file" accept=".pdf,.pptx,.txt">
-                    </div>
-                </div>
+    <div class="form-row">
+        <label class="form-label">File type:</label>
+        <input type="text" name="file_type" class="text-input">
+    </div>
 
-                <!-- File type 输入框 -->
-                <div class="form-row">
-                    <label class="form-label">File type:</label>
-                    <input type="text" name="file_type" class="text-input">
-                </div>
+<input type="hidden" name="speaker_id" value="{{ speaker_id }}">
+<input type="hidden" name="presentation_id" value="{{ presentation_id }}">
 
-                <button type="submit" class="submit-btn">上传</button>
-            </form>
+
+    <button type="submit" class="submit-btn">上传</button>
+</form>
+
         </div>
 
         <!-- 内容列表区 -->

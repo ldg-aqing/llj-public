@@ -42,3 +42,6 @@ def audience_view(request):
 
 def speaker_view(request):
     return render(request, 'users/speaker.html')
+
+def organizer_view(request):
+    return render(request, 'users/organizer.html')
