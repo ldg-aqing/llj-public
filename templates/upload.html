@@ -5,7 +5,12 @@
     <title>上传素材</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
 
         body {
             background-color: #f5f5f5;
@@ -13,14 +18,95 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 500px;
             margin: 0 auto;
             background: white;
-            border-radius: 10px;
+            border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
+        /* 上传表单区域 - 严格按图片样式 */
+        .upload-form {
+            padding: 30px;
+        }
+
+        .upload-title {
+            font-size: 18px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: normal;
+        }
+
+        .form-row {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-label {
+            width: 80px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .file-input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .file-input-button {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .file-input-hint {
+            font-size: 12px;
+            color: #999;
+            margin-left: 10px;
+            display: inline-block;
+        }
+
+        #file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 120px;
+            margin: 25px auto 0;
+            padding: 8px 0;
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        /* 以下保持原有功能区域不变 */
         .header {
             padding: 15px;
             border-bottom: 1px solid #eee;
@@ -40,11 +126,6 @@
             align-items: center;
         }
 
-        .back-btn:hover {
-            background-color: #f0f0f0;
-            border-radius: 4px;
-        }
-
         .presentation-info {
             flex: 1;
         }
@@ -56,28 +137,6 @@
 
         .info-label { color: #666; display: inline-block; width: 80px; }
         .info-value { color: #333; font-weight: 500; }
-
-        .upload-section {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            text-align: center;
-        }
-
-        .action-btn {
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            font-size: 15px;
-            cursor: pointer;
-            margin: 0 10px;
-            transition: all 0.3s;
-        }
-
-        .add-btn { background: #4285f4; color: white; }
-        .add-btn:hover { background: #3367d6; }
-
-        .submit-btn { background: #34a853; color: white; }
-        .submit-btn:hover { background: #2d9249; }
 
         .content-list {
             padding: 15px;
@@ -120,38 +179,6 @@
             font-size: 13px;
             cursor: pointer;
         }
-
-        .view-btn {
-            background: #f1f1f1;
-            color: #333;
-            border: 1px solid #ddd;
-        }
-
-        .delete-btn {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .upload-form {
-            padding: 20px;
-            text-align: center;
-        }
-
-        .upload-form h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        .upload-form form {
-            margin-top: 10px;
-        }
-
-        .upload-form button {
-            margin-top: 10px;
-            padding: 8px 16px;
-            font-size: 15px;
-        }
     </style>
 </head>
 <body>
@@ -168,17 +195,40 @@
             </div>
         </div>
 
-        <!-- 上传表单（原始功能） -->
+        <!-- 严格按图片样式的上传表单 -->
         <div class="upload-form">
-            <h2>上传文件（PDF / PPTX / TXT）</h2>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">上传</button>
-            </form>
+            <h2 class="upload-title">上传文件（PDF / PPTX / TXT）</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-row">
+        <input type="text" name="title" class="text-input">
+    </div>
+
+    <div class="form-row">
+        <label class="form-label">File:</label>
+        <div class="file-input-container">
+            <span class="file-input-button">选择文件</span>
+            <span class="file-input-hint">未选择文件</span>
+            <input type="file" id="file-input" name="file" accept=".pdf,.pptx,.txt">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label class="form-label">File type:</label>
+        <input type="text" name="file_type" class="text-input">
+    </div>
+
+<input type="hidden" name="speaker_id" value="{{ speaker_id }}">
+<input type="hidden" name="presentation_id" value="{{ presentation_id }}">
+
+
+    <button type="submit" class="submit-btn">上传</button>
+</form>
+
         </div>
 
-
+        <!-- 内容列表区 -->
         <div class="content-list">
             <div class="list-title">已上传内容列表</div>
             <div class="empty-tip" id="emptyTip">暂无上传内容</div>
@@ -187,7 +237,8 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        // 模拟从后端获取演讲信息
+        document.addEventListener('DOMContentLoaded', function() {
             const presentationData = {
                 name: "人工智能前沿技术分享",
                 speaker: "张教授",
@@ -202,12 +253,14 @@
             document.getElementById('presentation-audience').textContent = presentationData.audience + '人';
             document.getElementById('presentation-status').textContent = presentationData.status;
 
-            document.getElementById('addContent').addEventListener('click', function () {
-                addNewContent("新增内容_" + (document.querySelectorAll('.content-item').length + 1));
-            });
-
-            document.getElementById('submitAll').addEventListener('click', function () {
-                alert('提交功能需对接后端API');
+            // 文件选择显示
+            document.getElementById('file-input').addEventListener('change', function(e) {
+                const hint = document.querySelector('.file-input-hint');
+                if (this.files.length > 0) {
+                    hint.textContent = this.files[0].name;
+                } else {
+                    hint.textContent = '未选择文件';
+                }
             });
         });
 
@@ -226,7 +279,7 @@
                 </div>
             `;
 
-            newItem.querySelector('.delete-btn').addEventListener('click', function () {
+            newItem.querySelector('.delete-btn').addEventListener('click', function() {
                 if (confirm('确定删除此内容？')) {
                     newItem.remove();
                     if (document.querySelectorAll('.content-item').length === 0) {
@@ -235,7 +288,7 @@
                 }
             });
 
-            newItem.querySelector('.view-btn').addEventListener('click', function () {
+            newItem.querySelector('.view-btn').addEventListener('click', function() {
                 alert('查看内容: ' + contentName);
             });
 
