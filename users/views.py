@@ -26,11 +26,11 @@ def login_view(request):
             request.session['role'] = user.role
 
             if user.role == 'ORGANIZER':
-                return redirect('/users/organizer/')
+                return redirect('/presentations/organizer/')
             if user.role == 'SPEAKER':
                     return redirect('/presentations/speaker/')
             elif user.role == 'AUDIENCE':
-                return redirect('/users/audience/')
+                return redirect('/presentations/audience/')
         except User.DoesNotExist:
             messages.error(request, "用户名或密码错误")
 

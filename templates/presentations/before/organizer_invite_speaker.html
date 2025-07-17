@@ -1,10 +1,341 @@
-<!DOCTYPE html>
-<html lang="en">
+
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邀请演讲者 - 演讲管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 演讲信息区域 */
+        .presentation-info {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .presentation-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .presentation-organizer {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* 搜索区域 */
+        .search-section {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background-color: #fff;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-box:focus {
+            border-color: #4285f4;
+        }
+
+        /* 排序控制区域 */
+        .sort-controls {
+            padding: 10px 15px;
+            background-color: #fafafa;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sort-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .sort-btn.active {
+            background-color: #4285f4;
+            color: white;
+            border-color: #4285f4;
+        }
+
+        /* 听众列表区域 */
+        .speaker-list {
+            padding: 0;
+        }
+
+        .list-header {
+            padding: 12px 15px;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 1px solid #eee;
+            background-color: #fafafa;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .speaker-name {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .invite-btn {
+            background-color: #34a853;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #ea4335;
+            color: white;
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: #999;
+            padding: 20px 0;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <!-- 演讲信息区域 -->
+        <div class="presentation-info">
+            <h1 class="presentation-title" id="presentationTitle">人工智能前沿技术分享</h1>
+            <p class="presentation-organizer">组织者：<span id="organizerName">王助理</span></p>
+        </div>
 
+        <!-- 搜索区域 -->
+        <div class="search-section">
+            <input type="text" class="search-box" placeholder="搜索演讲者姓名..." id="speakerearch">
+        </div>
+
+        <!-- 排序控制区域 -->
+        <div class="sort-controls">
+            <button class="sort-btn active" id="sortUninvitedFirst">未邀请优先</button>
+            <button class="sort-btn" id="sortByName">按姓名排序</button>
+            <button class="sort-btn" id="sortOriginal">原始顺序</button>
+        </div>
+
+        <!-- 演讲者列表区域 -->
+        <div class="speaker-list">
+            <div class="list-header">
+                共 <span id="speakerCount">0</span> 位演讲者
+            </div>
+
+            <div id="speakerListContainer">
+                <!-- 动态内容将在这里生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据
+        const presentationData = {
+            id: 1,
+            title: "人工智能前沿技术分享",
+            organizer: "王助理"
+        };
+
+        // 模拟演讲者数据
+        const allspeaker = [
+            { id: 1, name: "严焊", invited: true },
+            { id: 2, name: "李伦波", invited: false },
+            { id: 3, name: "娄震", invited: false },
+
+        ];
+
+        // 当前排序方式
+        let currentSortMethod = 'uninvited';
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置演讲信息
+            document.getElementById('presentationTitle').textContent = presentationData.title;
+            document.getElementById('organizerName').textContent = presentationData.organizer;
+
+            // 渲染听众列表
+            renderspeakerList(getSortedspeaker());
+
+            // 绑定搜索事件
+            document.getElementById('speakerearch').addEventListener('input', function(e) {
+                filterspeaker(e.target.value);
+            });
+
+            // 绑定排序按钮事件
+            document.getElementById('sortUninvitedFirst').addEventListener('click', function() {
+                currentSortMethod = 'uninvited';
+                updateSortButtons();
+                renderspeakerList(getSortedspeaker());
+            });
+
+            document.getElementById('sortByName').addEventListener('click', function() {
+                currentSortMethod = 'name';
+                updateSortButtons();
+                renderspeakerList(getSortedspeaker());
+            });
+
+            document.getElementById('sortOriginal').addEventListener('click', function() {
+                currentSortMethod = 'original';
+                updateSortButtons();
+                renderspeakerList(getSortedspeaker());
+            });
+        });
+
+        // 更新排序按钮状态
+        function updateSortButtons() {
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            if (currentSortMethod === 'uninvited') {
+                document.getElementById('sortUninvitedFirst').classList.add('active');
+            } else if (currentSortMethod === 'name') {
+                document.getElementById('sortByName').classList.add('active');
+            } else {
+                document.getElementById('sortOriginal').classList.add('active');
+            }
+        }
+
+        // 获取排序后的演讲者列表
+        function getSortedspeaker() {
+            // 创建数组副本以避免修改原始数据
+            const speaker = [...allspeaker];
+
+            switch(currentSortMethod) {
+                case 'uninvited':
+                    // 未邀请的排在前面，其余保持原始顺序
+                    return speaker.sort((a, b) => {
+                        if (a.invited === b.invited) return 0;
+                        return a.invited ? 1 : -1;
+                    });
+                case 'name':
+                    // 按姓名排序
+                    return speaker.sort((a, b) => a.name.localeCompare(b.name));
+                default:
+                    // 原始顺序
+                    return speaker;
+            }
+        }
+
+        // 渲染演讲者列表
+        function renderspeakerList(speaker = getSortedspeaker()) {
+            const container = document.getElementById('speakerListContainer');
+            const countElement = document.getElementById('speakerCount');
+
+            if (speaker.length === 0) {
+                container.innerHTML = '<div class="empty-tip">暂无演讲者</div>';
+                countElement.textContent = '0';
+                return;
+            }
+
+            let html = '';
+            speaker.forEach(speaker => {
+                const isInvited = speaker.invited;
+                html += `
+                <div class="list-item" data-id="${speaker.id}">
+                    <span class="speaker-name">${speaker.name}</span>
+                    <button class="action-btn ${isInvited ? 'delete-btn' : 'invite-btn'}"
+                            onclick="toggleInvite('${speaker.id}')">
+                        ${isInvited ? '删除' : '邀请'}
+                    </button>
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            countElement.textContent = speaker.length;
+        }
+
+        // 过滤演讲者
+        function filterspeaker(keyword) {
+            keyword = keyword.toLowerCase();
+            const filtered = allspeaker.filter(speaker =>
+                speaker.name.toLowerCase().includes(keyword)
+            );
+            renderspeakerList(sortspeaker(filtered));
+        }
+
+        // 根据当前排序方式对演讲者进行排序
+        function sortspeaker(speaker) {
+            const sorted = [...speaker];
+
+            switch(currentSortMethod) {
+                case 'uninvited':
+                    return sorted.sort((a, b) => {
+                        if (a.invited === b.invited) return 0;
+                        return a.invited ? 1 : -1;
+                    });
+                case 'name':
+                    return sorted.sort((a, b) => a.name.localeCompare(b.name));
+                default:
+                    return sorted;
+            }
+        }
+
+        // 切换邀请状态
+        function toggleInvite(speakerId) {
+            // 这里应该是AJAX请求，暂时只做前端演示
+            const speaker = allspeaker.find(a => a.id == speakerId);
+            if (speaker) {
+                speaker.invited = !speaker.invited;
+                renderspeakerList(getSortedspeaker());
+
+                // 模拟API调用
+                const action = speaker.invited ? '邀请' : '取消邀请';
+                console.log(`${action}听众 ${speaker.name} (ID: ${speaker.id})`);
+            }
+        }
+    </script>
 </body>
 </html>

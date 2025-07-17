@@ -11,9 +11,7 @@ class Upload(models.Model):
     presentation = models.ForeignKey(Presentation, on_delete=models.CASCADE)
     file_path = models.CharField(max_length=255)
     file_type = models.CharField(max_length=10, choices=FILE_TYPES)
+    content = models.TextField(default='未提取')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
-class ExtractedText(models.Model):
-    upload = models.ForeignKey(Upload, on_delete=models.CASCADE)
-    content = models.TextField()
-    extracted_at = models.DateTimeField(auto_now_add=True)
+

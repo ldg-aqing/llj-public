@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>演讲者主页</title>
+    <title>听众主页</title>
     <style>
         * {
             margin: 0;
@@ -108,23 +108,23 @@
       <div class="presentation-list">
     <div class="list-title">我的演讲收听列表</div>
 
-   {% for presentation in presentations %}
+{% for presentation in presentations %}
     <div class="presentation-item">
         <div class="presentation-details">
             <div class="presentation-name">{{ presentation.title }}</div>
             <div class="presentation-status">状态：{{ presentation.get_status_display }}</div>
         </div>
 
-        {% if presentation.status == 'PENDING' %}
-                        <button class="enter-btn" disabled>未开始</button>
-        {% elif presentation.status == 'LIVE' %}
-                        <button class="enter-btn" type="button" onclick="window.location.href='/upload/'">进入</button>
-            <button class="enter-btn" disabled>进行中</button>
+        {% if presentation.status == 'LIVE' %}
+            <button class="enter-btn">进入演讲</button>
         {% elif presentation.status == 'FINISHED' %}
-            <a href="#" class="enter-btn">查看</a>
+            <a href="/presentations/report/{{ presentation.id }}/" class="enter-btn">查看报告</a>
+        {% else %}
+            <button class="enter-btn" disabled>待开始</button>
         {% endif %}
     </div>
 {% endfor %}
+
 </div>
     </div>
 </body>
