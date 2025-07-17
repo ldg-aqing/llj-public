@@ -143,14 +143,33 @@
         </div>
 
         <!-- 新增演讲创建区域 -->
-        <div class="create-section">
-            <div class="create-title">创建新演讲</div>
-            <form class="create-form" method="post" action="/presentations/create/">
-                {% csrf_token %}
-                <input type="text" name="title" class="presentation-input" placeholder="输入演讲名称" required>
-                <button type="submit" class="create-btn">创建</button>
-            </form>
+<div class="create-section">
+    <div class="create-title">创建新演讲</div>
+
+    {% if message %}
+        <p style="color: red;">{{ message }}</p>
+    {% endif %}
+
+    <form method="post" action="/presentations/create/" style="width: 100%; display: flex; flex-direction: column; gap: 12px;">
+        {% csrf_token %}
+
+        <input type="text" name="title" placeholder="输入演讲名称" required style="padding: 8px 10px; font-size: 16px; width: 100%; box-sizing: border-box;" />
+
+        <input type="text" name="description" placeholder="输入演讲描述" required style="padding: 8px 10px; font-size: 16px; width: 100%; box-sizing: border-box;" />
+
+        <select name="speaker_id" required style="padding: 8px 10px; font-size: 16px; width: 100%; box-sizing: border-box;">
+            <option value="">请选择演讲者</option>
+            {% for speaker in speakers %}
+                <option value="{{ speaker.id }}">{{ speaker.username }}</option>
+            {% endfor %}
+        </select>
+        <div style="text-align: right;">
+            <button type="submit" style="padding: 8px 20px; font-size: 16px; background-color: #347cff; color: white; border: none; border-radius: 4px;">
+                创建
+            </button>
         </div>
+    </form>
+</div>
 
         <!-- 演讲列表区 -->
         <div class="presentation-list">

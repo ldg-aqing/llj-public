@@ -1,10 +1,345 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邀请听众 - 演讲管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 演讲信息区域 */
+        .presentation-info {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .presentation-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .presentation-organizer {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* 搜索区域 */
+        .search-section {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background-color: #fff;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-box:focus {
+            border-color: #4285f4;
+        }
+
+        /* 排序控制区域 */
+        .sort-controls {
+            padding: 10px 15px;
+            background-color: #fafafa;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sort-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .sort-btn.active {
+            background-color: #4285f4;
+            color: white;
+            border-color: #4285f4;
+        }
+
+        /* 听众列表区域 */
+        .audience-list {
+            padding: 0;
+        }
+
+        .list-header {
+            padding: 12px 15px;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 1px solid #eee;
+            background-color: #fafafa;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .audience-name {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .invite-btn {
+            background-color: #34a853;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #ea4335;
+            color: white;
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: #999;
+            padding: 20px 0;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <!-- 演讲信息区域 -->
+        <div class="presentation-info">
+            <h1 class="presentation-title" id="presentationTitle">人工智能前沿技术分享</h1>
+            <p class="presentation-organizer">组织者：<span id="organizerName">王助理</span></p>
+        </div>
 
+        <!-- 搜索区域 -->
+        <div class="search-section">
+            <input type="text" class="search-box" placeholder="搜索听众姓名..." id="audienceSearch">
+        </div>
+
+        <!-- 排序控制区域 -->
+        <div class="sort-controls">
+            <button class="sort-btn active" id="sortUninvitedFirst">未邀请优先</button>
+            <button class="sort-btn" id="sortByName">按姓名排序</button>
+            <button class="sort-btn" id="sortOriginal">原始顺序</button>
+        </div>
+
+        <!-- 听众列表区域 -->
+        <div class="audience-list">
+            <div class="list-header">
+                共 <span id="audienceCount">0</span> 位听众
+            </div>
+
+            <div id="audienceListContainer">
+                <!-- 动态内容将在这里生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据
+        const presentationData = {
+            id: 1,
+            title: "人工智能前沿技术分享",
+            organizer: "王助理"
+        };
+
+        // 模拟听众数据
+        const allAudiences = [
+            { id: 1, name: "张三", invited: false },
+            { id: 2, name: "李四", invited: true },
+            { id: 3, name: "王五", invited: false },
+            { id: 4, name: "赵六", invited: true },
+            { id: 5, name: "钱七", invited: false },
+            { id: 6, name: "孙八", invited: false },
+            { id: 7, name: "周九", invited: true },
+            { id: 8, name: "吴十", invited: false }
+        ];
+
+        // 当前排序方式
+        let currentSortMethod = 'uninvited';
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置演讲信息
+            document.getElementById('presentationTitle').textContent = presentationData.title;
+            document.getElementById('organizerName').textContent = presentationData.organizer;
+
+            // 渲染听众列表
+            renderAudienceList(getSortedAudiences());
+
+            // 绑定搜索事件
+            document.getElementById('audienceSearch').addEventListener('input', function(e) {
+                filterAudiences(e.target.value);
+            });
+
+            // 绑定排序按钮事件
+            document.getElementById('sortUninvitedFirst').addEventListener('click', function() {
+                currentSortMethod = 'uninvited';
+                updateSortButtons();
+                renderAudienceList(getSortedAudiences());
+            });
+
+            document.getElementById('sortByName').addEventListener('click', function() {
+                currentSortMethod = 'name';
+                updateSortButtons();
+                renderAudienceList(getSortedAudiences());
+            });
+
+            document.getElementById('sortOriginal').addEventListener('click', function() {
+                currentSortMethod = 'original';
+                updateSortButtons();
+                renderAudienceList(getSortedAudiences());
+            });
+        });
+
+        // 更新排序按钮状态
+        function updateSortButtons() {
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            if (currentSortMethod === 'uninvited') {
+                document.getElementById('sortUninvitedFirst').classList.add('active');
+            } else if (currentSortMethod === 'name') {
+                document.getElementById('sortByName').classList.add('active');
+            } else {
+                document.getElementById('sortOriginal').classList.add('active');
+            }
+        }
+
+        // 获取排序后的听众列表
+        function getSortedAudiences() {
+            // 创建数组副本以避免修改原始数据
+            const audiences = [...allAudiences];
+
+            switch(currentSortMethod) {
+                case 'uninvited':
+                    // 未邀请的排在前面，其余保持原始顺序
+                    return audiences.sort((a, b) => {
+                        if (a.invited === b.invited) return 0;
+                        return a.invited ? 1 : -1;
+                    });
+                case 'name':
+                    // 按姓名排序
+                    return audiences.sort((a, b) => a.name.localeCompare(b.name));
+                default:
+                    // 原始顺序
+                    return audiences;
+            }
+        }
+
+        // 渲染听众列表
+        function renderAudienceList(audiences = getSortedAudiences()) {
+            const container = document.getElementById('audienceListContainer');
+            const countElement = document.getElementById('audienceCount');
+
+            if (audiences.length === 0) {
+                container.innerHTML = '<div class="empty-tip">暂无听众</div>';
+                countElement.textContent = '0';
+                return;
+            }
+
+            let html = '';
+            audiences.forEach(audience => {
+                const isInvited = audience.invited;
+                html += `
+                <div class="list-item" data-id="${audience.id}">
+                    <span class="audience-name">${audience.name}</span>
+                    <button class="action-btn ${isInvited ? 'delete-btn' : 'invite-btn'}"
+                            onclick="toggleInvite('${audience.id}')">
+                        ${isInvited ? '删除' : '邀请'}
+                    </button>
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            countElement.textContent = audiences.length;
+        }
+
+        // 过滤听众
+        function filterAudiences(keyword) {
+            keyword = keyword.toLowerCase();
+            const filtered = allAudiences.filter(audience =>
+                audience.name.toLowerCase().includes(keyword)
+            );
+            renderAudienceList(sortAudiences(filtered));
+        }
+
+        // 根据当前排序方式对听众进行排序
+        function sortAudiences(audiences) {
+            const sorted = [...audiences];
+
+            switch(currentSortMethod) {
+                case 'uninvited':
+                    return sorted.sort((a, b) => {
+                        if (a.invited === b.invited) return 0;
+                        return a.invited ? 1 : -1;
+                    });
+                case 'name':
+                    return sorted.sort((a, b) => a.name.localeCompare(b.name));
+                default:
+                    return sorted;
+            }
+        }
+
+        // 切换邀请状态
+        function toggleInvite(audienceId) {
+            // 这里应该是AJAX请求，暂时只做前端演示
+            const audience = allAudiences.find(a => a.id == audienceId);
+            if (audience) {
+                audience.invited = !audience.invited;
+                renderAudienceList(getSortedAudiences());
+
+                // 模拟API调用
+                const action = audience.invited ? '邀请' : '取消邀请';
+                console.log(`${action}听众 ${audience.name} (ID: ${audience.id})`);
+            }
+        }
+    </script>
 </body>
 </html>
