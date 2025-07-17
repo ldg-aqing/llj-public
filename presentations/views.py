@@ -77,3 +77,10 @@ def start_presentation(request, pk):
     return render(request, "upload.html", {"form": form})
 
 
+#测试，待规范
+def organizer_before_presentation(request):
+    return render(request, "presentations/before/organizer_beforep.html")
+def organizer_invite_audience(request):
+    return render(request, "presentations/before/organizer_invite_audience.html")
+def organizer_invite_speaker(request):
+    return render(request, "presentations/before/organizer_invite_speaker.html")

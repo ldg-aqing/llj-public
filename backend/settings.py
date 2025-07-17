@@ -1,5 +1,6 @@
 
 from pathlib import Path
+from dotenv import load_dotenv
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -17,6 +18,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+load_dotenv()
+DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
 # Application definition
 
 INSTALLED_APPS = [
@@ -70,6 +73,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+
+# 开发阶段临时允许匿名访问
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
+}
 
 
 # Database
