@@ -14,18 +14,23 @@ def generate_ai_quiz(request, presentation_id):
 
         text = upload.content
         ai_output = generate_question_from_text(text)
-        quiz = save_quiz_from_ai_response(presentation, ai_output)
+        quizzes = save_quiz_from_ai_response(presentation, ai_output)
 
         return Response({
             "status": "success",
-            "quiz_id": quiz.id,
             "presentation_id": presentation.id,
             "text": text,
             "output": ai_output,
-            "question": quiz.question,
-            "options": [
-                {"id": option.id, "text": option.option_text}
-                for option in quiz.options.all()
+            "quizzes": [
+                {
+                    "id": quiz.id,
+                    "question": quiz.question,
+                    "options": [
+                        {"id": option.id, "text": option.option_text}
+                        for option in quiz.options.all()
+                    ]
+                }
+                for quiz in quizzes
             ]
         })
 
