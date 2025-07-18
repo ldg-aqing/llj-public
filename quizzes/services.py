@@ -72,7 +72,8 @@ def generate_question_from_text(text):
     print("发送给 AI 的 prompt 是：\n", prompt)
 
     response = dashscope.Generation.call(
-        model='qwen-turbo',
+        model='qwen-plus',
+        model_version='2025-07-14',  
         messages=[{"role": "user", "content": prompt}],
         result_format='message',
         api_key=settings.DASHSCOPE_API_KEY
