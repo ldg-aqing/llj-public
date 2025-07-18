@@ -121,7 +121,7 @@ def create_presentation(request):
         'speakers': speakers
     })
 
-def organizer_invite_audience(request, presentation_id):
+def organizer_before_presentation(request, presentation_id):
     # 先获取该场演讲
     presentation = Presentation.objects.get(id=presentation_id)
 
@@ -129,14 +129,19 @@ def organizer_invite_audience(request, presentation_id):
     speakers = User.objects.filter(role='SPEAKER')
     audiences = User.objects.filter(role='AUDIENCE')
 
-    return render(request, 'presentations/before/organizer_invite_audience.html', {
+    return render(request, 'presentations/before/organizer_beforep.html', {
         'presentation': presentation,
         'speakers': speakers,
         'audiences': audiences
     })
 
 #测试，待规范
-def organizer_before_presentation(request):
-    return render(request, "presentations/before/organizer_beforep.html")
+def organizer_invite_audience(request):
+    return render(request, "presentations/before/organizer_invite_audience.html")
 def organizer_invite_speaker(request):
     return render(request, "presentations/before/organizer_invite_speaker.html")
+
+def organizer_during_presentation(request):
+    return render(request, "presentations/during/organizer_duringp.html")
+def audience_during_presentation(request):
+    return render(request, "presentations/during/audience_duringp.html")
