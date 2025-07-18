@@ -35,9 +35,12 @@ def organizer_home(request):
     # 获取该演讲者的所有演讲
     presentations = Presentation.objects.filter(organizer=user)
 
+    speakers = User.objects.filter(role='SPEAKER')
+    print("Organizer home: SPEAKER count =", speakers.count())
+
     return render(request, 'users/organizer.html', {
-        'user': user,
         'presentations': presentations,
+        'speakers': speakers  # ✅ 传入模板
     })
 
 def audience_home(request):
@@ -76,11 +79,69 @@ def start_presentation(request, pk):
 
     return render(request, "upload.html", {"form": form})
 
+def create_presentation(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('/users/login/')
+
+    try:
+        organizer = User.objects.get(id=user_id, role='ORGANIZER')
+    except User.DoesNotExist:
+        return render(request, 'error.html', {'message': '组织者不存在或无权限'})
+
+    speakers = User.objects.filter(role='SPEAKER')  # 一开始就准备好所有 speaker
+    print("当前表名：", User._meta.db_table)
+    print("SPEAKER 数量：", speakers.count())
+    for s in speakers:
+        print(s.id, s.username, s.role)
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        speaker_id = request.POST.get('speaker_id')
+
+        try:
+            speaker = User.objects.get(id=speaker_id, role='SPEAKER')
+        except User.DoesNotExist:
+            return render(request, 'users/organizer.html', {  # 👈 改成你实际用的模板
+                'speakers': speakers,
+                'message': '演讲者无效或未选择'
+            })
+
+        Presentation.objects.create(
+            title=title,
+            description=description,
+            organizer=organizer,
+            speaker=speaker,
+            status='PENDING',
+        )
+        return redirect('/presentations/organizer/')
+
+    # GET 请求也要传入 speakers
+    return render(request, 'users/organizer.html', {  # 👈 改成你实际用的模板
+        'speakers': speakers
+    })
+
+def organizer_before_presentation(request, presentation_id):
+    # 先获取该场演讲
+    presentation = Presentation.objects.get(id=presentation_id)
+
+    # 获取演讲者与听众信息
+    speakers = User.objects.filter(role='SPEAKER')
+    audiences = User.objects.filter(role='AUDIENCE')
+
+    return render(request, 'presentations/before/organizer_beforep.html', {
+        'presentation': presentation,
+        'speakers': speakers,
+        'audiences': audiences
+    })
 
 #测试，待规范
-def organizer_before_presentation(request):
-    return render(request, "presentations/before/organizer_beforep.html")
 def organizer_invite_audience(request):
     return render(request, "presentations/before/organizer_invite_audience.html")
 def organizer_invite_speaker(request):
     return render(request, "presentations/before/organizer_invite_speaker.html")
+
+def organizer_during_presentation(request):
+    return render(request, "presentations/during/organizer_duringp.html")
+def audience_during_presentation(request):
+    return render(request, "presentations/during/audience_duringp.html")

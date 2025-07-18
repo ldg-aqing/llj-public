@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>观众页面 - 演讲互动系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 演讲信息区域 */
+        .presentation-info {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .presentation-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .presentation-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .meta-label {
+            font-weight: 500;
+            margin-right: 5px;
+        }
+
+        /* 反馈区域 */
+        .feedback-section {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background-color: #4285f4;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        .feedback-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .feedback-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .feedback-input:focus {
+            border-color: #4285f4;
+        }
+
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .submit-btn:hover {
+            background-color: #3367d6;
+        }
+
+        .feedback-list {
+            list-style: none;
+        }
+
+        .feedback-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .feedback-item:last-child {
+            border-bottom: none;
+        }
+
+        .feedback-content {
+            flex: 1;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .feedback-user {
+            width: 120px;
+            text-align: right;
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* 题目区域 */
+        .question-section {
+            padding: 15px;
+        }
+
+        .question-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .question-box {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .question-header {
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .question-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .question-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: #e6f4ea;
+            color: #34a853;
+        }
+
+        .status-completed {
+            background-color: #f1f3f4;
+            color: #5f6368;
+        }
+
+        .question-content {
+            padding: 15px;
+        }
+
+        .question-text {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .question-options {
+            list-style: none;
+            margin-left: 20px;
+        }
+
+        .question-option {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-radio {
+            margin-right: 10px;
+        }
+
+        .question-answer {
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border-top: 1px dashed #e0e0e0;
+            font-size: 14px;
+            display: none;
+        }
+
+        .answer-label {
+            font-weight: 600;
+            color: #333;
+            margin-right: 8px;
+        }
+
+        .answer-text {
+            color: #34a853;
+        }
+
+        .question-explanation {
+            padding: 12px 15px;
+            font-size: 14px;
+            color: #666;
+            border-top: 1px dashed #e0e0e0;
+            display: none;
+        }
+
+        .explanation-label {
+            font-weight: 600;
+            color: #333;
+            margin-right: 8px;
+        }
+
+        .discussion-area {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        .discussion-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .discussion-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .discussion-item:last-child {
+            border-bottom: none;
+        }
+
+        .discussion-content {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .discussion-user {
+            width: 120px;
+            text-align: right;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .discussion-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .discussion-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .discussion-input:focus {
+            border-color: #4285f4;
+        }
+
+        .question-actions {
+            padding: 12px 15px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .submit-answer-btn {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: #999;
+            padding: 20px 0;
+            font-size: 14px;
+        }
+
+        .my-answer {
+            padding: 8px 12px;
+            background-color: #e8f0fe;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #4285f4;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 演讲信息区域 -->
+        <div class="presentation-info">
+            <h1 class="presentation-title" id="presentationTitle">加载中...</h1>
+            <div class="presentation-meta">
+                <div class="meta-item">
+                    <span class="meta-label">组织者:</span>
+                    <span id="organizerName">加载中...</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">演讲者:</span>
+                    <span id="speakerName">加载中...</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">参与人数:</span>
+                    <span id="attendeeCount">加载中...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 反馈区域 -->
+        <div class="feedback-section">
+            <h2 class="section-title">听众反馈</h2>
+            <div class="feedback-form">
+                <input type="text" class="feedback-input" id="feedbackInput" placeholder="请输入您的反馈...">
+                <button class="submit-btn" id="submitFeedback">提交</button>
+            </div>
+            <ul class="feedback-list" id="feedbackList">
+                <li class="empty-tip">正在加载反馈数据...</li>
+            </ul>
+        </div>
+
+        <!-- 题目区域 -->
+        <div class="question-section">
+            <h2 class="section-title">互动题目</h2>
+            <div class="question-list" id="questionList">
+                <div class="empty-tip">正在加载题目数据...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据 - 实际应用中这些数据应该通过AJAX从后端获取
+        const mockData = {
+            presentation: {
+                id: 1,
+                title: "人工智能前沿技术研讨会",
+                organizer: "张教授",
+                speaker: "李博士",
+                attendeeCount: 128
+            },
+            feedbacks: [
+                { id: 1, content: "这个演讲内容非常前沿，收获很大！", user: "王同学", time: "2025-07-18 10:30" },
+                { id: 2, content: "希望能多讲一些实际应用案例", user: "赵工程师", time: "2025-07-18 10:45" },
+                { id: 3, content: "第二部分的内容有点难理解，建议放慢语速", user: "刘研究员", time: "2025-07-18 11:00" }
+            ],
+            questions: [
+                {
+                    id: 1,
+                    title: "题目 #1: 人工智能伦理问题讨论",
+                    status: "active",
+                    content: "在人工智能应用中，以下哪个伦理问题最为关键？请选择您认为最重要的一个选项并简要说明理由。",
+                    options: [
+                        "A. 数据隐私保护",
+                        "B. 算法偏见与歧视",
+                        "C. 自动化带来的就业影响",
+                        "D. 自主武器系统的道德风险"
+                    ],
+                    answer: "B. 算法偏见与歧视",
+                    explanation: "算法偏见可能导致系统性歧视，影响特定群体的权益，这是AI伦理中最普遍且影响深远的问题。",
+                    discussions: [],
+                    myAnswer: null
+                },
+                {
+                    id: 2,
+                    title: "题目 #2: 机器学习模型评估",
+                    status: "completed",
+                    content: "在评估机器学习模型时，以下哪种情况最可能导致过拟合？请选择最可能的一个选项。",
+                    options: [
+                        "A. 训练数据量太少",
+                        "B. 模型复杂度太高",
+                        "C. 特征工程不充分",
+                        "D. 测试集和训练集分布不一致"
+                    ],
+                    answer: "B. 模型复杂度太高",
+                    explanation: "模型复杂度过高会使其过度记忆训练数据中的噪声和细节，导致在训练集上表现很好但在新数据上表现差。",
+                    discussions: [
+                        { id: 1, content: "这个题目考察得很细致，模型复杂度确实是过拟合的主要原因", user: "周同学", time: "2025-07-18 09:15" },
+                        { id: 2, content: "在实际项目中，我们通常使用正则化来解决这个问题", user: "吴研究员", time: "2025-07-18 09:30" }
+                    ],
+                    myAnswer: "B"
+                }
+            ],
+            currentUser: "观众A" // 模拟当前登录用户
+        };
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 模拟从服务器加载数据
+            setTimeout(() => {
+                loadPresentationData();
+                loadFeedbacks();
+                loadQuestions();
+
+                // 绑定反馈提交事件
+                document.getElementById('submitFeedback').addEventListener('click', submitFeedback);
+
+                // 绑定答题提交事件
+                document.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('submit-answer-btn')) {
+                        const questionId = parseInt(e.target.getAttribute('data-question-id'));
+                        submitAnswer(questionId);
+                    }
+                });
+
+                // 绑定讨论提交事件
+                document.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('submit-discussion-btn')) {
+                        const questionId = parseInt(e.target.getAttribute('data-question-id'));
+                        submitDiscussion(questionId);
+                    }
+                });
+            }, 500);
+        });
+
+        // 加载演讲信息
+        function loadPresentationData() {
+            const presentation = mockData.presentation;
+            document.getElementById('presentationTitle').textContent = presentation.title;
+            document.getElementById('organizerName').textContent = presentation.organizer;
+            document.getElementById('speakerName').textContent = presentation.speaker;
+            document.getElementById('attendeeCount').textContent = presentation.attendeeCount;
+        }
+
+        // 加载反馈数据
+        function loadFeedbacks() {
+            const container = document.getElementById('feedbackList');
+            const feedbacks = mockData.feedbacks;
+
+            if (feedbacks.length === 0) {
+                container.innerHTML = '<div class="empty-tip">暂无反馈</div>';
+                return;
+            }
+
+            let html = '';
+            feedbacks.forEach(feedback => {
+                html += `
+                <li class="feedback-item">
+                    <div class="feedback-content">${feedback.content}</div>
+                    <div class="feedback-user">${feedback.user}<br><small>${feedback.time}</small></div>
+                </li>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 加载题目数据
+        function loadQuestions() {
+            const container = document.getElementById('questionList');
+            const questions = mockData.questions;
+
+            // 过滤掉未开始的题目
+            const filteredQuestions = questions.filter(q => q.status !== 'upcoming');
+
+            if (filteredQuestions.length === 0) {
+                container.innerHTML = '<div class="empty-tip">暂无题目</div>';
+                return;
+            }
+
+            let html = '';
+            filteredQuestions.forEach(question => {
+                const statusClass = `status-${question.status}`;
+                const statusText = {
+                    'active': '进行中',
+                    'completed': '已结束'
+                }[question.status];
+
+                let optionsHtml = '';
+                question.options.forEach((option, index) => {
+                    const optionId = `question-${question.id}-option-${index}`;
+                    optionsHtml += `
+                    <li class="question-option">
+                        <input type="radio" id="${optionId}" name="question-${question.id}" value="${option}" class="option-radio" ${question.myAnswer === option[0] ? 'checked' : ''}>
+                        <label for="${optionId}">${option}</label>
+                    </li>
+                    `;
+                });
+
+                let answerSection = '';
+                let explanationSection = '';
+                let discussionSection = '';
+                let actionsHtml = '';
+
+                if (question.status === 'completed') {
+                    answerSection = `
+                    <div class="question-answer" style="display: block;">
+                        <span class="answer-label">参考答案:</span>
+                        <span class="answer-text">${question.answer}</span>
+                    </div>
+                    <div class="question-explanation" style="display: block;">
+                        <span class="explanation-label">解析:</span>
+                        <span>${question.explanation}</span>
+                    </div>
+                    `;
+
+                    if (question.myAnswer) {
+                        answerSection += `
+                        <div class="my-answer" style="display: block;">
+                            我的选择: ${question.myAnswer}
+                        </div>
+                        `;
+                    }
+
+                    let discussionsHtml = '';
+                    if (question.discussions.length > 0) {
+                        question.discussions.forEach(discussion => {
+                            discussionsHtml += `
+                            <li class="discussion-item">
+                                <div class="discussion-content">${discussion.content}</div>
+                                <div class="discussion-user">${discussion.user}<br><small>${discussion.time}</small></div>
+                            </li>
+                            `;
+                        });
+                    } else {
+                        discussionsHtml = '<div class="empty-tip">暂无讨论</div>';
+                    }
+
+                    discussionSection = `
+                    <div class="discussion-area" style="display: block;">
+                        <h3 class="section-title">讨论区</h3>
+                        <ul class="discussion-list">
+                            ${discussionsHtml}
+                        </ul>
+                        <div class="discussion-form">
+                            <input type="text" class="discussion-input" id="discussionInput-${question.id}" placeholder="参与讨论...">
+                            <button class="submit-btn submit-discussion-btn" data-question-id="${question.id}">提交</button>
+                        </div>
+                    </div>
+                    `;
+                } else if (question.status === 'active') {
+                    actionsHtml = `
+                    <div class="question-actions">
+                        <button class="action-btn submit-answer-btn" data-question-id="${question.id}">提交答案</button>
+                    </div>
+                    `;
+                }
+
+                html += `
+                <div class="question-box" data-question-id="${question.id}">
+                    <div class="question-header">
+                        <span class="question-title">${question.title}</span>
+                        <span class="question-status ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="question-content">
+                        <div class="question-text">${question.content}</div>
+                        <ul class="question-options">${optionsHtml}</ul>
+                    </div>
+                    ${answerSection}
+                    ${explanationSection}
+                    ${discussionSection}
+                    ${actionsHtml}
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 提交反馈
+        function submitFeedback() {
+            const input = document.getElementById('feedbackInput');
+            const content = input.value.trim();
+
+            if (!content) {
+                alert('请输入反馈内容');
+                return;
+            }
+
+            // 模拟提交到服务器
+            const newFeedback = {
+                id: mockData.feedbacks.length + 1,
+                content: content,
+                user: mockData.currentUser,
+                time: new Date().toLocaleString()
+            };
+
+            mockData.feedbacks.unshift(newFeedback);
+            input.value = '';
+
+            // 重新加载反馈列表
+            loadFeedbacks();
+
+            // 在实际应用中，这里应该调用API将反馈提交到服务器
+            console.log('提交反馈:', newFeedback);
+        }
+
+        // 提交答案
+        function submitAnswer(questionId) {
+            const question = mockData.questions.find(q => q.id === questionId);
+            if (!question) return;
+
+            const selectedOption = document.querySelector(`input[name="question-${questionId}"]:checked`);
+            if (!selectedOption) {
+                alert('请选择一个选项');
+                return;
+            }
+
+            // 模拟提交到服务器
+            question.myAnswer = selectedOption.value[0]; // 只保存选项字母
+
+            // 重新加载题目列表
+            loadQuestions();
+
+            // 在实际应用中，这里应该调用API将答案提交到服务器
+            console.log(`提交题目 #${questionId} 的答案:`, selectedOption.value);
+        }
+
+        // 提交讨论
+        function submitDiscussion(questionId) {
+            const input = document.getElementById(`discussionInput-${questionId}`);
+            const content = input.value.trim();
+
+            if (!content) {
+                alert('请输入讨论内容');
+                return;
+            }
+
+            // 模拟提交到服务器
+            const question = mockData.questions.find(q => q.id === questionId);
+            if (question) {
+                const newDiscussion = {
+                    id: question.discussions.length + 1,
+                    content: content,
+                    user: mockData.currentUser,
+                    time: new Date().toLocaleString()
+                };
+
+                question.discussions.push(newDiscussion);
+                input.value = '';
+
+                // 重新加载题目列表
+                loadQuestions();
+
+                // 在实际应用中，这里应该调用API将讨论提交到服务器
+                console.log(`提交题目 #${questionId} 的讨论:`, newDiscussion);
+            }
+        }
+    </script>
+</body>
+</html>
