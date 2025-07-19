@@ -1,8 +1,8 @@
-# 🧠 PopQuiz — 演讲互动智能出题系统
+# 🧠 基于AI的演讲互动智能出题系统
 
 ## 📌 What's it?
 
-**PopQuiz** 是一个基于 Django 和 AI 的智能问答系统，旨在提升讲度、演讲、培训等场景下的互动性与反馈效率。
+**PopQuiz（llj-public）** 是一个基于 Django 和 AI 的智能问答系统，旨在提升讲度、演讲、培训等场景下的互动性与反馈效率。
 
 它解决的问题包括：
 
@@ -85,7 +85,7 @@ python manage.py runserver 0.0.0.0:8000
 
 ---
 
-## 🡩‍🤝‍🡨 Who Contributes?
+## 🤝‍ Who Contributes?
 
 | 姓名  | 角色    | 职责                         |
 | --- | ----- | -------------------------- |
