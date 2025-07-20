@@ -13,6 +13,7 @@ input {
 html,
 body {
     height: 100%;
+    width: 100%;
 }
 
 body {
@@ -20,9 +21,9 @@ body {
     overflow-x: hidden;
     display: flex;
     /* 渐变方向从左到右 */
-    background: linear-gradient(to right, rgb(247, 209, 215), rgb(191, 227, 241));
+    background: linear-gradient(to right, rgb(247, 209, 215), rgb(122, 199, 225));
     /* 初始缩放为0，准备动画 */
-    animation: pageLoad 2s ease-out forwards;
+    animation: pageLoad 1s ease-out forwards;
 }
 
 @keyframes pageLoad {
@@ -31,7 +32,7 @@ body {
         opacity: 0;
     }
     100% {
-        transform: scale(1.2);
+        transform: scale(1);
         opacity: 1;
     }
 }
@@ -68,28 +69,31 @@ span {
         opacity: .9;
     }
     100% {
-        transform: translateY(-1800%) scale(1.2);
+        transform: translateY(-1800%) scale(1.0);
         opacity: 0;
     }
 }
 
-/* 最外层的大盒子 */
+/* 最外层的大盒子 - 修改为百分比宽度和固定宽高比 */
 .box {
-    width: 1050px;
-    height: 600px;
+    backdrop-filter: blur(15px);
+
+    width: 64%;
+    max-width: 1050px;
+    aspect-ratio: 1050/600; /* 保持原始长宽比 1050:600 */
     display: flex;
     /* 相对定位 */
     position: relative;
     z-index: 2;
-    margin: auto;
+    margin: 10% auto auto;;
     /* 设置圆角 */
-    border-radius: 8px;
+    border-radius: 15px;
     /* 设置边框 */
     border: 1px solid rgba(255, 255, 255, .6);
     /* 设置盒子阴影 */
-    box-shadow: 2px 1px 19px rgba(0, 0, 0, .1);
+    box-shadow: 4px 2px 38px rgba(0, 0, 0, .1);
     /* 添加缩放动画 */
-    animation: boxScale 2s ease-out forwards;
+    animation: boxScale 0.5s ease-out forwards;
 }
 
 @keyframes boxScale {
@@ -98,8 +102,8 @@ span {
         opacity: 0;
     }
     100% {
-        transform: scale(1.2);
-        opacity: 1;
+        transform: scale(1);
+        opacity: 0.9;
     }
 }
 
@@ -116,7 +120,7 @@ span {
     top: 0;
     z-index: 99;
     border-radius: 4px;
-    background-color: #edd4dc;
+    background-color: #4090eb;
     box-shadow: 2px 1px 19px rgba(0, 0, 0, .1);
     /* 动画过渡，先加速再减速 */
     transition: 0.5s ease-in-out;
@@ -134,12 +138,12 @@ span {
     text-align: center;
     /* 文字间距 */
     letter-spacing: 10px;
-    color: white;
+    color: #f6f6f6;
     /* 禁止选中 */
     user-select: none;
     /* 文字阴影 */
     text-shadow: 4px 4px 3px rgba(0, 0, 0, .1);
-    font-size: 3.5rem; /* 从2.5rem增大到3.5rem */
+    font-size: clamp(1.5rem, 4vw, 5rem); /* 使用clamp实现响应式字体 */
     margin-bottom: 20px;
 }
 
@@ -152,16 +156,17 @@ span {
     /* 禁止选中 */
     user-select: none;
     font-weight: bold;
-    color: white;
+    color: #ffffff;
     text-shadow: 4px 4px 3px rgba(0, 0, 0, .1);
-    font-size: 2rem; /* 从1.2rem增大到2rem */
+    font-size: clamp(1rem, 2.3vw, 3rem); /* 使用clamp实现响应式字体 */
 }
 
 /* 图片盒子 */
 .img-box {
-    width: 250px; /* 适当增大 */
-    height: 250px; /* 适当增大 */
-    margin: 30px auto; /* 调整间距 */
+    width: 40%; /* 改为百分比 */
+    aspect-ratio: 1/1; /* 保持正方形 */
+    max-width: 250px;
+    margin: 5% auto; /* 改为百分比 */
     /* 设置为圆形 */
     border-radius: 50%;
     /* 设置用户禁止选中 */
@@ -187,8 +192,11 @@ span {
 
 /* 标题盒子 */
 .title-box {
-    height: 150px;
-    line-height: 150px;
+    height: 25%; /* 改为百分比 */
+    line-height: 1.2; /* 调整行高 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 标题 - 增大字体 */
@@ -198,8 +206,9 @@ span {
     /* 禁止选中 */
     user-select: none;
     letter-spacing: 10px;
-    text-shadow: 4px 4px 3px rgba(0, 0, 0, .1);
-    font-size: 3.5rem;
+    text-shadow: 5px 5px 4px rgba(0, 0, 0, .1);
+    font-size: clamp(2.5rem, 7.5vw, 5rem);
+    padding: 0 5px; /* 添加内边距防止文字溢出 */
 }
 
 /* 输入框盒子 */
@@ -209,26 +218,44 @@ span {
     flex-direction: column;
     /* 水平居中 */
     align-items: center;
-    margin-top: 20px;
+    margin-top: 5%; /* 改为百分比 */
+    width: 100%;
+
 }
 
 /* 输入框 - 增大尺寸 */
 input {
+    line-height:1.2;
     width: 70%;
-    height: 50px;
-    margin-bottom: 25px;
-    text-indent: 15px;
+    height: 7%; /* 改为百分比 */
+    min-height: 40px; /* 设置最小高度 */
+    margin-bottom: 4%; /* 改为百分比 */
+    text-indent: 17px;
     border: 1px solid #fff;
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: #b0cfe9;
     border-radius: 120px;
     /* 增加磨砂质感 */
     backdrop-filter: blur(10px);
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem); /* 使用clamp实现响应式字体 */
 }
 
-input:focus {
-    /* 光标颜色 */
-    color: #b0cfe9;
+/* 输入框有内容时的样式 - 保持浅蓝色 */
+input:not(:placeholder-shown),
+select:not(:placeholder-shown) {
+    background-color: #e1f0fa !important; /* 强制保持浅蓝色 */
+}
+
+/* 焦点状态 - 轻微加深边框 */
+input:focus, select:focus {
+    border-color: #70b4f0;
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(240, 242, 246);
+}
+
+/* 处理自动填充 */
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px #e1f0fa inset !important;
+    -webkit-text-fill-color: #000000 !important;
 }
 
 /* 聚焦时隐藏文字 */
@@ -240,19 +267,21 @@ input:focus::placeholder {
 .btn-box {
     display: flex;
     justify-content: center;
+    margin-top: 5%; /* 改为百分比 */
+    flex-wrap: wrap; /* 允许换行 */
 }
 
 /* 按钮 - 增大尺寸 */
 button {
-    width: 120px;
-    height: 40px;
-    margin: 0 10px;
+    width: 150px;
+    height: 55px;
+    margin: -10px 10px;
     line-height: 40px;
     border: none;
     border-radius: 6px;
-    background-color: #69b3f0;
-    color: white;
-    font-size: 1.1rem;
+    background-color: #d6d6db;
+    color: #157df8;
+    font-size: clamp(1.2rem, 1.9vw, 1.5rem); /* 使用clamp实现响应式字体 */
 }
 
 /* 按钮悬停时 */
@@ -269,26 +298,29 @@ button:hover {
     line-height: 40px;
     /* 禁止选中 */
     user-select: none;
-    font-size: 1rem;
-    color: white;
+    font-size: clamp(1.2rem, 1.9vw, 1.5rem); /* 使用clamp实现响应式字体 */
+    color:#157df8;
+    margin: 0 10px;
 }
 
 .btn-box p:hover {
+       background-color: #d6d6db;
     cursor: pointer;
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid #157df8;
 }
 
 /* 美化角色选择下拉框 - 增大尺寸 */
 select {
     width: 70%;
-    height: 50px;
-    margin-bottom: 25px;
+    height: 7%; /* 改为百分比 */
+    min-height: 40px; /* 设置最小高度 */
+    margin-bottom: 4%; /* 改为百分比 */
     text-indent: 15px;
-    border: 1px solid #fff;
-    background-color: rgba(255, 255, 255, 0.3);
+    border: 1px solid #b0cfe9;
+    background-color: #b0cfe9;
     border-radius: 120px;
     backdrop-filter: blur(10px);
-    color: #555;
+    color: #2e2e2e;
     padding: 0 15px;
     appearance: none;
     -webkit-appearance: none;
@@ -297,7 +329,7 @@ select {
     background-repeat: no-repeat;
     background-position: right 15px center;
     background-size: 15px;
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem); /* 使用clamp实现响应式字体 */
 }
 
 select:focus {
@@ -309,4 +341,34 @@ select option {
     background-color: rgba(151, 179, 241, 0.8);
     color: #0b0101;
     font-size: 1rem;
+}
+
+/* 添加媒体查询以适应更小的屏幕 */
+@media (max-width: 768px) {
+    .box {
+        width: 95%;
+        max-width: none;
+    }
+
+    .pre-box h1, .title-box h1 {
+        font-size: clamp(1.2rem, 5vw, 2rem);
+        letter-spacing: 5px;
+    }
+
+    .pre-box p {
+        font-size: clamp(0.8rem, 3vw, 1.2rem);
+    }
+
+    input, select {
+        width: 85%;
+    }
+
+    .btn-box {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    button {
+        margin: 5px 0;
+    }
 }
