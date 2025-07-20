@@ -3,6 +3,7 @@ from users.models import User
 from presentations.models import Presentation
 from quizzes.models import Quiz
 
+
 class Feedback(models.Model):
     FEEDBACK_TYPES = (
         ('SPEAKER', 'Speaker'),
