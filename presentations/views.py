@@ -36,7 +36,7 @@ def organizer_home(request):
     presentations = Presentation.objects.filter(organizer=user)
 
     speakers = User.objects.filter(role='SPEAKER')
-    print("Organizer home: SPEAKER count =", speakers.count())
+
 
     return render(request, 'users/organizer.html', {
         'presentations': presentations,

@@ -22,8 +22,7 @@ body {
     display: flex;
     /* 渐变方向从左到右 */
     background: linear-gradient(to right, rgb(247, 209, 215), rgb(122, 199, 225));
-    /* 初始缩放为0，准备动画 */
-    animation: pageLoad 1s ease-out forwards;
+
 }
 
 @keyframes pageLoad {
@@ -54,25 +53,6 @@ span {
     animation: myMove 4s linear infinite;
 }
 
-@keyframes myMove {
-    0% {
-        transform: translateY(0%);
-        opacity: 1;
-    }
-    50% {
-        transform: translate(10%, -1000%);
-    }
-    75% {
-        transform: translate(-20%, -1200%);
-    }
-    99% {
-        opacity: .9;
-    }
-    100% {
-        transform: translateY(-1800%) scale(1.0);
-        opacity: 0;
-    }
-}
 
 /* 最外层的大盒子 - 修改为百分比宽度和固定宽高比 */
 .box {
@@ -92,8 +72,6 @@ span {
     border: 1px solid rgba(255, 255, 255, .6);
     /* 设置盒子阴影 */
     box-shadow: 4px 2px 38px rgba(0, 0, 0, .1);
-    /* 添加缩放动画 */
-    animation: boxScale 0.5s ease-out forwards;
 }
 
 @keyframes boxScale {
