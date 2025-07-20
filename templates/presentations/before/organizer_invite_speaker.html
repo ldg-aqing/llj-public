@@ -1,9 +1,9 @@
-
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>邀请演讲者 - 演讲管理</title>
+    <title>更换演讲者 - 演讲管理</title>
     <style>
         * {
             margin: 0;
@@ -89,7 +89,7 @@
             border-color: #4285f4;
         }
 
-        /* 听众列表区域 */
+        /* 演讲者列表区域 */
         .speaker-list {
             padding: 0;
         }
@@ -119,6 +119,11 @@
             color: #333;
         }
 
+        .current-speaker {
+            font-size: 15px;
+            color: #999;
+        }
+
         .action-btn {
             padding: 6px 12px;
             border-radius: 4px;
@@ -129,13 +134,8 @@
             text-align: center;
         }
 
-        .invite-btn {
-            background-color: #34a853;
-            color: white;
-        }
-
-        .delete-btn {
-            background-color: #ea4335;
+        .change-btn {
+            background-color: #4285f4;
             color: white;
         }
 
@@ -157,7 +157,7 @@
 
         <!-- 搜索区域 -->
         <div class="search-section">
-            <input type="text" class="search-box" placeholder="搜索演讲者姓名..." id="speakerearch">
+            <input type="text" class="search-box" placeholder="搜索演讲者姓名..." id="speakerSearch">
         </div>
 
         <!-- 排序控制区域 -->
@@ -184,15 +184,15 @@
         const presentationData = {
             id: 1,
             title: "人工智能前沿技术分享",
-            organizer: "王助理"
+            organizer: "王助理",
+            currentSpeakerId: 1 // 当前演讲者ID
         };
 
         // 模拟演讲者数据
-        const allspeaker = [
-            { id: 1, name: "严焊", invited: true },
-            { id: 2, name: "李伦波", invited: false },
-            { id: 3, name: "娄震", invited: false },
-
+        const allSpeakers = [
+            { id: 1, name: "严焊" },
+            { id: 2, name: "李伦波" },
+            { id: 3, name: "娄震" },
         ];
 
         // 当前排序方式
@@ -204,31 +204,31 @@
             document.getElementById('presentationTitle').textContent = presentationData.title;
             document.getElementById('organizerName').textContent = presentationData.organizer;
 
-            // 渲染听众列表
-            renderspeakerList(getSortedspeaker());
+            // 渲染演讲者列表
+            renderSpeakerList(getSortedSpeakers());
 
             // 绑定搜索事件
-            document.getElementById('speakerearch').addEventListener('input', function(e) {
-                filterspeaker(e.target.value);
+            document.getElementById('speakerSearch').addEventListener('input', function(e) {
+                filterSpeakers(e.target.value);
             });
 
             // 绑定排序按钮事件
             document.getElementById('sortUninvitedFirst').addEventListener('click', function() {
                 currentSortMethod = 'uninvited';
                 updateSortButtons();
-                renderspeakerList(getSortedspeaker());
+                renderSpeakerList(getSortedSpeakers());
             });
 
             document.getElementById('sortByName').addEventListener('click', function() {
                 currentSortMethod = 'name';
                 updateSortButtons();
-                renderspeakerList(getSortedspeaker());
+                renderSpeakerList(getSortedSpeakers());
             });
 
             document.getElementById('sortOriginal').addEventListener('click', function() {
                 currentSortMethod = 'original';
                 updateSortButtons();
-                renderspeakerList(getSortedspeaker());
+                renderSpeakerList(getSortedSpeakers());
             });
         });
 
@@ -248,73 +248,75 @@
         }
 
         // 获取排序后的演讲者列表
-        function getSortedspeaker() {
+        function getSortedSpeakers() {
             // 创建数组副本以避免修改原始数据
-            const speaker = [...allspeaker];
+            const speakers = [...allSpeakers];
 
             switch(currentSortMethod) {
                 case 'uninvited':
-                    // 未邀请的排在前面，其余保持原始顺序
-                    return speaker.sort((a, b) => {
-                        if (a.invited === b.invited) return 0;
-                        return a.invited ? 1 : -1;
+                    // 当前演讲者排在前面，其余保持原始顺序
+                    return speakers.sort((a, b) => {
+                        if (a.id === presentationData.currentSpeakerId) return -1;
+                        if (b.id === presentationData.currentSpeakerId) return 1;
+                        return 0;
                     });
                 case 'name':
                     // 按姓名排序
-                    return speaker.sort((a, b) => a.name.localeCompare(b.name));
+                    return speakers.sort((a, b) => a.name.localeCompare(b.name));
                 default:
                     // 原始顺序
-                    return speaker;
+                    return speakers;
             }
         }
 
         // 渲染演讲者列表
-        function renderspeakerList(speaker = getSortedspeaker()) {
+        function renderSpeakerList(speakers = getSortedSpeakers()) {
             const container = document.getElementById('speakerListContainer');
             const countElement = document.getElementById('speakerCount');
 
-            if (speaker.length === 0) {
+            if (speakers.length === 0) {
                 container.innerHTML = '<div class="empty-tip">暂无演讲者</div>';
                 countElement.textContent = '0';
                 return;
             }
 
             let html = '';
-            speaker.forEach(speaker => {
-                const isInvited = speaker.invited;
+            speakers.forEach(speaker => {
+                const isCurrentSpeaker = speaker.id === presentationData.currentSpeakerId;
                 html += `
                 <div class="list-item" data-id="${speaker.id}">
                     <span class="speaker-name">${speaker.name}</span>
-                    <button class="action-btn ${isInvited ? 'delete-btn' : 'invite-btn'}"
-                            onclick="toggleInvite('${speaker.id}')">
-                        ${isInvited ? '删除' : '邀请'}
-                    </button>
+                    ${isCurrentSpeaker ? 
+                        '<span class="current-speaker">当前演讲者</span>' : 
+                        '<button class="action-btn change-btn" onclick="changeSpeaker(\'' + speaker.id + '\')">更换</button>'
+                    }
                 </div>
                 `;
             });
 
             container.innerHTML = html;
-            countElement.textContent = speaker.length;
+            countElement.textContent = speakers.length;
         }
 
         // 过滤演讲者
-        function filterspeaker(keyword) {
+        function filterSpeakers(keyword) {
             keyword = keyword.toLowerCase();
-            const filtered = allspeaker.filter(speaker =>
+            const filtered = allSpeakers.filter(speaker =>
                 speaker.name.toLowerCase().includes(keyword)
             );
-            renderspeakerList(sortspeaker(filtered));
+            renderSpeakerList(sortSpeakers(filtered));
         }
 
         // 根据当前排序方式对演讲者进行排序
-        function sortspeaker(speaker) {
-            const sorted = [...speaker];
+        function sortSpeakers(speakers) {
+            const sorted = [...speakers];
 
             switch(currentSortMethod) {
                 case 'uninvited':
                     return sorted.sort((a, b) => {
-                        if (a.invited === b.invited) return 0;
-                        return a.invited ? 1 : -1;
+                        if (a.id === presentationData.currentSpeakerId) return -1;
+                        if (b.id === presentationData.currentSpeakerId) return 1;
+                        return 0;
                     });
                 case 'name':
                     return sorted.sort((a, b) => a.name.localeCompare(b.name));
@@ -323,17 +325,17 @@
             }
         }
 
-        // 切换邀请状态
-        function toggleInvite(speakerId) {
+        // 更换演讲者
+        function changeSpeaker(speakerId) {
             // 这里应该是AJAX请求，暂时只做前端演示
-            const speaker = allspeaker.find(a => a.id == speakerId);
+            const speaker = allSpeakers.find(a => a.id == speakerId);
             if (speaker) {
-                speaker.invited = !speaker.invited;
-                renderspeakerList(getSortedspeaker());
+                // 更新当前演讲者ID
+                presentationData.currentSpeakerId = speaker.id;
+                renderSpeakerList(getSortedSpeakers());
 
                 // 模拟API调用
-                const action = speaker.invited ? '邀请' : '取消邀请';
-                console.log(`${action}听众 ${speaker.name} (ID: ${speaker.id})`);
+                console.log(`更换演讲者为 ${speaker.name} (ID: ${speaker.id})`);
             }
         }
     </script>

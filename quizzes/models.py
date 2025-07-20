@@ -5,6 +5,7 @@ from users.models import User
 class Quiz(models.Model):
     presentation = models.ForeignKey(Presentation, on_delete=models.CASCADE)
     question = models.TextField()
+    explanation = models.TextField(blank=True, null=True)
     created_by_ai = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

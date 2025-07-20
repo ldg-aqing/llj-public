@@ -116,7 +116,7 @@
         </div>
 
         {% if presentation.status == 'LIVE' %}
-            <button class="enter-btn">进入演讲</button>
+            <button class="enter-btn" type="button" onclick="window.location.href='/presentations/audience_during_presentation'">进入演讲</button>
         {% elif presentation.status == 'FINISHED' %}
             <a href="/presentations/report/{{ presentation.id }}/" class="enter-btn">查看报告</a>
         {% else %}

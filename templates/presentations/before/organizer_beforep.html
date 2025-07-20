@@ -128,7 +128,7 @@
         <div class="list-section">
             <div class="list-header">
                 <h2 class="list-title">演讲者列表</h2>
-                <a href="/add_speaker/1" class="add-btn">添加演讲者</a>
+      <button class="add-btn" type="button" onclick="window.location.href='/presentations/organizer_invite_speaker'">更换演讲者</button>
             </div>
             <div id="speakerList">
                 <!-- JS动态生成 -->
@@ -149,7 +149,7 @@
         <div class="list-section">
             <div class="list-header">
                 <h2 class="list-title">听众列表</h2>
-                <a href="/add_audience/1" class="add-btn">添加听众</a>
+                 <button class="add-btn" type="button" onclick="window.location.href='/presentations/organizer_invite_audience'">添加听众</button>
             </div>
             <div id="audienceList">
                 <!-- JS动态生成 -->
@@ -216,7 +216,6 @@
                 html += `
                 <div class="list-item" data-id="${speaker.id}">
                     <span class="item-name">${speaker.name}</span>
-                    <button class="action-btn delete-btn" onclick="deleteSpeaker(${speaker.id})">删除</button>
                 </div>
                 `;
             });
@@ -277,19 +276,6 @@
             }
         }
 
-        // 删除演讲者
-        function deleteSpeaker(id) {
-            if (confirm('确定要删除这个演讲者吗？')) {
-                // 从数组中删除
-                const index = speakers.findIndex(s => s.id === id);
-                if (index !== -1) {
-                    speakers.splice(index, 1);
-                    renderSpeakerList();
-                }
-                // 实际项目中这里应该是AJAX请求
-                alert('演讲者已删除');
-            }
-        }
 
         // 查看文件
         function viewFile(id) {
