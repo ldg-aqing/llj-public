@@ -13,6 +13,7 @@ input {
 html,
 body {
     height: 100%;
+    width: 100%;
 }
 
 body {
@@ -31,7 +32,7 @@ body {
         opacity: 0;
     }
     100% {
-        transform: scale(1.2);
+        transform: scale(1);
         opacity: 1;
     }
 }
@@ -73,10 +74,11 @@ span {
     }
 }
 
-/* 最外层的大盒子 */
+/* 最外层的大盒子 - 修改为百分比宽度和固定宽高比 */
 .box {
-    width: 1050px;
-    height: 600px;
+    width: 80%;
+    max-width: 1050px;
+    aspect-ratio: 1050/600; /* 保持原始长宽比 1050:600 */
     display: flex;
     /* 相对定位 */
     position: relative;
@@ -98,7 +100,7 @@ span {
         opacity: 0;
     }
     100% {
-        transform: scale(1.2);
+        transform: scale(1);
         opacity: 1;
     }
 }
@@ -139,7 +141,7 @@ span {
     user-select: none;
     /* 文字阴影 */
     text-shadow: 4px 4px 3px rgba(0, 0, 0, .1);
-    font-size: 3.5rem; /* 从2.5rem增大到3.5rem */
+    font-size: clamp(1.5rem, 4vw, 3.5rem); /* 使用clamp实现响应式字体 */
     margin-bottom: 20px;
 }
 
@@ -154,14 +156,15 @@ span {
     font-weight: bold;
     color: white;
     text-shadow: 4px 4px 3px rgba(0, 0, 0, .1);
-    font-size: 2rem; /* 从1.2rem增大到2rem */
+    font-size: clamp(1rem, 2.5vw, 2rem); /* 使用clamp实现响应式字体 */
 }
 
 /* 图片盒子 */
 .img-box {
-    width: 250px; /* 适当增大 */
-    height: 250px; /* 适当增大 */
-    margin: 30px auto; /* 调整间距 */
+    width: 40%; /* 改为百分比 */
+    aspect-ratio: 1/1; /* 保持正方形 */
+    max-width: 250px;
+    margin: 5% auto; /* 改为百分比 */
     /* 设置为圆形 */
     border-radius: 50%;
     /* 设置用户禁止选中 */
@@ -187,8 +190,11 @@ span {
 
 /* 标题盒子 */
 .title-box {
-    height: 150px;
-    line-height: 150px;
+    height: 25%; /* 改为百分比 */
+    line-height: 1.2; /* 调整行高 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 标题 - 增大字体 */
@@ -199,7 +205,8 @@ span {
     user-select: none;
     letter-spacing: 10px;
     text-shadow: 4px 4px 3px rgba(0, 0, 0, .1);
-    font-size: 3.5rem;
+    font-size: clamp(1.5rem, 4vw, 3.5rem); /* 使用clamp实现响应式字体 */
+    padding: 0 10px; /* 添加内边距防止文字溢出 */
 }
 
 /* 输入框盒子 */
@@ -209,21 +216,23 @@ span {
     flex-direction: column;
     /* 水平居中 */
     align-items: center;
-    margin-top: 20px;
+    margin-top: 5%; /* 改为百分比 */
+    width: 100%;
 }
 
 /* 输入框 - 增大尺寸 */
 input {
     width: 70%;
-    height: 50px;
-    margin-bottom: 25px;
+    height: 7%; /* 改为百分比 */
+    min-height: 40px; /* 设置最小高度 */
+    margin-bottom: 4%; /* 改为百分比 */
     text-indent: 15px;
     border: 1px solid #fff;
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 120px;
     /* 增加磨砂质感 */
     backdrop-filter: blur(10px);
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem); /* 使用clamp实现响应式字体 */
 }
 
 input:focus {
@@ -240,6 +249,8 @@ input:focus::placeholder {
 .btn-box {
     display: flex;
     justify-content: center;
+    margin-top: 5%; /* 改为百分比 */
+    flex-wrap: wrap; /* 允许换行 */
 }
 
 /* 按钮 - 增大尺寸 */
@@ -252,7 +263,7 @@ button {
     border-radius: 6px;
     background-color: #69b3f0;
     color: white;
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem); /* 使用clamp实现响应式字体 */
 }
 
 /* 按钮悬停时 */
@@ -269,8 +280,9 @@ button:hover {
     line-height: 40px;
     /* 禁止选中 */
     user-select: none;
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 1.5vw, 1rem); /* 使用clamp实现响应式字体 */
     color: white;
+    margin: 0 10px;
 }
 
 .btn-box p:hover {
@@ -281,8 +293,9 @@ button:hover {
 /* 美化角色选择下拉框 - 增大尺寸 */
 select {
     width: 70%;
-    height: 50px;
-    margin-bottom: 25px;
+    height: 7%; /* 改为百分比 */
+    min-height: 40px; /* 设置最小高度 */
+    margin-bottom: 4%; /* 改为百分比 */
     text-indent: 15px;
     border: 1px solid #fff;
     background-color: rgba(255, 255, 255, 0.3);
@@ -297,7 +310,7 @@ select {
     background-repeat: no-repeat;
     background-position: right 15px center;
     background-size: 15px;
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem); /* 使用clamp实现响应式字体 */
 }
 
 select:focus {
@@ -309,4 +322,34 @@ select option {
     background-color: rgba(151, 179, 241, 0.8);
     color: #0b0101;
     font-size: 1rem;
+}
+
+/* 添加媒体查询以适应更小的屏幕 */
+@media (max-width: 768px) {
+    .box {
+        width: 95%;
+        max-width: none;
+    }
+
+    .pre-box h1, .title-box h1 {
+        font-size: clamp(1.2rem, 5vw, 2rem);
+        letter-spacing: 5px;
+    }
+
+    .pre-box p {
+        font-size: clamp(0.8rem, 3vw, 1.2rem);
+    }
+
+    input, select {
+        width: 85%;
+    }
+
+    .btn-box {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    button {
+        margin: 5px 0;
+    }
 }
