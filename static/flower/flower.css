@@ -1,0 +1,64 @@
+/* SVG植物插图样式 */
+.plant-illustration {
+  position: absolute;  /* 绝对定位 */
+  right: 0;           /* 贴紧右侧 */
+  top: 50%;           /* 垂直居中 */
+  transform: translateY(-50%); /* 精确垂直居中 */
+  width: 200px;       /* 适当宽度 */
+  height: auto;       /* 高度自适应 */
+  z-index: 1;         /* 确保在背景层 */
+  pointer-events: none; /* 不干扰点击事件 */
+}
+
+/* 确保登录框有足够右边距 */
+.box {
+  margin-right: 220px; /* 给SVG留出空间 */
+}
+
+svg {
+  height: 40vh;
+  width: 100%;
+  margin-top: 10vh;
+  opacity: 0.9
+}
+
+#illustration {
+   animation: squigglevision 0.5s infinite alternate;
+}
+
+@keyframes squigglevision {
+  0% {
+    filter: url('#sketch-0');
+  }
+  25% {
+    filter: url('#sketch-1');
+  }
+  50% {
+    filter: url('#sketch-2');
+  }
+  75% {
+    filter: url('#sketch-3');
+  }
+  100% {
+    filter: url('#sketch-4');
+  }
+}
+
+.path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: paint 1s ease-in-out 1s forwards;
+}
+
+.path:nth-of-type(2) {
+  animation-delay: 2s;
+}
+
+@keyframes paint {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
