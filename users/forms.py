@@ -18,6 +18,6 @@ class RegisterForm(forms.ModelForm):
 
         if password and password != password_confirm:
             self.add_error("password_confirm", "密码不一致")
-class LoginForm(forms.Form):
-    username = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput)
+
+
+
