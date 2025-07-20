@@ -15,6 +15,7 @@ urlpatterns = [
     path('material/', include('material.urls')),
     path('api/quizzes/', include('quizzes.urls')),
 
+
     path('', lambda request: redirect('/users/login')),  # 访问 / 自动跳转到登录页
 ]
 

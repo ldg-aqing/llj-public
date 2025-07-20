@@ -3,8 +3,14 @@ from presentations.models import Presentation
 from users.models import User
 
 class Quiz(models.Model):
+    STATUS_CHOICES = [
+        ('upcoming', '未开始'),
+        ('active', '进行中'),
+        ('completed', '已结束'),
+    ]
     presentation = models.ForeignKey(Presentation, on_delete=models.CASCADE)
     question = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='upcoming')
     explanation = models.TextField(blank=True, null=True)
     created_by_ai = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -29,3 +35,4 @@ class QuizSession(models.Model):
     selected_option = models.ForeignKey(QuizOption, on_delete=models.SET_NULL, null=True)
     is_correct = models.BooleanField()
     answered_at = models.DateTimeField(auto_now_add=True)
+
