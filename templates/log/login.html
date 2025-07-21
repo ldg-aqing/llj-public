@@ -3,6 +3,25 @@
 {% load static %}
 {% block content %}
 
+    <style>
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+    </style>
+
+    <!-- 添加视频背景 -->
+    <video autoplay muted loop class="video-background">
+        <source src="{% static '/video/background.webm' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+
      <!-- 🚨 登录失败提示信息 -->
     {% if messages %}
         <ul class="error-messages">
@@ -61,13 +80,12 @@
                 </div>
                 <div class="btn-box">
             <button type="submit">注册</button>
-            </form>
-
-
-                <!-- 绑定点击事件 -->
+                                    <!-- 绑定点击事件 -->
                 <p onclick="mySwitch()">已有账号?去登录</p>
+                    </div>
+            </form>
             </div>
-        </div>
+
 
 
 
@@ -90,11 +108,10 @@
             <!-- 按钮盒子 -->
             <div class="btn-box">
                 <button>登录</button>
-            </form>
-
                 <!-- 绑定点击事件 -->
                 <p onclick="mySwitch()">没有账号?去注册</p>
             </div>
+            </form>
         </div>
 
        </div>
@@ -126,14 +143,14 @@
                     // 获取到滑动盒子的dom元素并修改它移动的位置
                     $(".pre-box").css("transform","translateX(100%)")
                     // 获取到滑动盒子的dom元素并修改它的背景颜色
-                    $(".pre-box").css("background-color","#c9e0ed")
+                    $(".pre-box").css("background-color","#f685a3")
                     //修改图片的路径
                     $("img").attr("src","{% static 'img/wuwu.jpeg' %}")
 
                 }
                 else {
                     $(".pre-box").css("transform","translateX(0%)")
-                    $(".pre-box").css("background-color","#edd4dc")
+                    $(".pre-box").css("background-color","#4090eb")
                     $("img").attr("src","{% static 'img/waoku.jpg' %}")
                 }
                 flag=!flag
@@ -173,4 +190,3 @@
 
 </html>
 {% endblock %}
-
