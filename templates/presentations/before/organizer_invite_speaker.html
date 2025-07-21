@@ -147,197 +147,29 @@
         }
     </style>
 </head>
+<button class="add-btn" type="button"
+        onclick="window.location.href='/presentations/manage/{{ presentation.id }}/';"
+        style="margin: 20px 0 10px 10px;">
+    返回演讲页
+</button>
 <body>
-    <div class="container">
-        <!-- 演讲信息区域 -->
-        <div class="presentation-info">
-            <h1 class="presentation-title" id="presentationTitle">人工智能前沿技术分享</h1>
-            <p class="presentation-organizer">组织者：<span id="organizerName">王助理</span></p>
+    <div class="speaker-list">
+    <form method="post">
+        {% csrf_token %}
+        {% for speaker in speakers %}
+        <div class="list-item">
+            <span class="speaker-name">{{ speaker.username }}</span>
+            {% if speaker.id == current_speaker.id %}
+                <span class="current-speaker">当前演讲者</span>
+            {% else %}
+                <button type="submit" class="action-btn change-btn" name="speaker_id" value="{{ speaker.id }}">更换</button>
+            {% endif %}
         </div>
+        {% endfor %}
+    </form>
+</div>
 
-        <!-- 搜索区域 -->
-        <div class="search-section">
-            <input type="text" class="search-box" placeholder="搜索演讲者姓名..." id="speakerSearch">
-        </div>
 
-        <!-- 排序控制区域 -->
-        <div class="sort-controls">
-            <button class="sort-btn active" id="sortUninvitedFirst">未邀请优先</button>
-            <button class="sort-btn" id="sortByName">按姓名排序</button>
-            <button class="sort-btn" id="sortOriginal">原始顺序</button>
-        </div>
 
-        <!-- 演讲者列表区域 -->
-        <div class="speaker-list">
-            <div class="list-header">
-                共 <span id="speakerCount">0</span> 位演讲者
-            </div>
-
-            <div id="speakerListContainer">
-                <!-- 动态内容将在这里生成 -->
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 模拟数据
-        const presentationData = {
-            id: 1,
-            title: "人工智能前沿技术分享",
-            organizer: "王助理",
-            currentSpeakerId: 1 // 当前演讲者ID
-        };
-
-        // 模拟演讲者数据
-        const allSpeakers = [
-            { id: 1, name: "严焊" },
-            { id: 2, name: "李伦波" },
-            { id: 3, name: "娄震" },
-        ];
-
-        // 当前排序方式
-        let currentSortMethod = 'uninvited';
-
-        // 初始化页面
-        document.addEventListener('DOMContentLoaded', function() {
-            // 设置演讲信息
-            document.getElementById('presentationTitle').textContent = presentationData.title;
-            document.getElementById('organizerName').textContent = presentationData.organizer;
-
-            // 渲染演讲者列表
-            renderSpeakerList(getSortedSpeakers());
-
-            // 绑定搜索事件
-            document.getElementById('speakerSearch').addEventListener('input', function(e) {
-                filterSpeakers(e.target.value);
-            });
-
-            // 绑定排序按钮事件
-            document.getElementById('sortUninvitedFirst').addEventListener('click', function() {
-                currentSortMethod = 'uninvited';
-                updateSortButtons();
-                renderSpeakerList(getSortedSpeakers());
-            });
-
-            document.getElementById('sortByName').addEventListener('click', function() {
-                currentSortMethod = 'name';
-                updateSortButtons();
-                renderSpeakerList(getSortedSpeakers());
-            });
-
-            document.getElementById('sortOriginal').addEventListener('click', function() {
-                currentSortMethod = 'original';
-                updateSortButtons();
-                renderSpeakerList(getSortedSpeakers());
-            });
-        });
-
-        // 更新排序按钮状态
-        function updateSortButtons() {
-            document.querySelectorAll('.sort-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            if (currentSortMethod === 'uninvited') {
-                document.getElementById('sortUninvitedFirst').classList.add('active');
-            } else if (currentSortMethod === 'name') {
-                document.getElementById('sortByName').classList.add('active');
-            } else {
-                document.getElementById('sortOriginal').classList.add('active');
-            }
-        }
-
-        // 获取排序后的演讲者列表
-        function getSortedSpeakers() {
-            // 创建数组副本以避免修改原始数据
-            const speakers = [...allSpeakers];
-
-            switch(currentSortMethod) {
-                case 'uninvited':
-                    // 当前演讲者排在前面，其余保持原始顺序
-                    return speakers.sort((a, b) => {
-                        if (a.id === presentationData.currentSpeakerId) return -1;
-                        if (b.id === presentationData.currentSpeakerId) return 1;
-                        return 0;
-                    });
-                case 'name':
-                    // 按姓名排序
-                    return speakers.sort((a, b) => a.name.localeCompare(b.name));
-                default:
-                    // 原始顺序
-                    return speakers;
-            }
-        }
-
-        // 渲染演讲者列表
-        function renderSpeakerList(speakers = getSortedSpeakers()) {
-            const container = document.getElementById('speakerListContainer');
-            const countElement = document.getElementById('speakerCount');
-
-            if (speakers.length === 0) {
-                container.innerHTML = '<div class="empty-tip">暂无演讲者</div>';
-                countElement.textContent = '0';
-                return;
-            }
-
-            let html = '';
-            speakers.forEach(speaker => {
-                const isCurrentSpeaker = speaker.id === presentationData.currentSpeakerId;
-                html += `
-                <div class="list-item" data-id="${speaker.id}">
-                    <span class="speaker-name">${speaker.name}</span>
-                    ${isCurrentSpeaker ? 
-                        '<span class="current-speaker">当前演讲者</span>' : 
-                        '<button class="action-btn change-btn" onclick="changeSpeaker(\'' + speaker.id + '\')">更换</button>'
-                    }
-                </div>
-                `;
-            });
-
-            container.innerHTML = html;
-            countElement.textContent = speakers.length;
-        }
-
-        // 过滤演讲者
-        function filterSpeakers(keyword) {
-            keyword = keyword.toLowerCase();
-            const filtered = allSpeakers.filter(speaker =>
-                speaker.name.toLowerCase().includes(keyword)
-            );
-            renderSpeakerList(sortSpeakers(filtered));
-        }
-
-        // 根据当前排序方式对演讲者进行排序
-        function sortSpeakers(speakers) {
-            const sorted = [...speakers];
-
-            switch(currentSortMethod) {
-                case 'uninvited':
-                    return sorted.sort((a, b) => {
-                        if (a.id === presentationData.currentSpeakerId) return -1;
-                        if (b.id === presentationData.currentSpeakerId) return 1;
-                        return 0;
-                    });
-                case 'name':
-                    return sorted.sort((a, b) => a.name.localeCompare(b.name));
-                default:
-                    return sorted;
-            }
-        }
-
-        // 更换演讲者
-        function changeSpeaker(speakerId) {
-            // 这里应该是AJAX请求，暂时只做前端演示
-            const speaker = allSpeakers.find(a => a.id == speakerId);
-            if (speaker) {
-                // 更新当前演讲者ID
-                presentationData.currentSpeakerId = speaker.id;
-                renderSpeakerList(getSortedSpeakers());
-
-                // 模拟API调用
-                console.log(`更换演讲者为 ${speaker.name} (ID: ${speaker.id})`);
-            }
-        }
-    </script>
 </body>
 </html>

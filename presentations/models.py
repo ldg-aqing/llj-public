@@ -20,6 +20,7 @@ class Presentation(models.Model):
 class PresentationAttendee(models.Model):
     presentation = models.ForeignKey(Presentation, on_delete=models.CASCADE)
     attendee = models.ForeignKey(User, on_delete=models.CASCADE)
-
+    def __str__(self):
+        return f"{self.presentation.title}-{self.attendee.username}"
     class Meta:
         unique_together = ('presentation', 'attendee')
