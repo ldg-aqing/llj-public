@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>查看文件内容</title>
+</head>
+<body>
+    <h2>文件内容预览</h2>
+    <p><strong>文件名：</strong>{{ file.file_path }}</p>
+    <p><strong>上传者：</strong>{{ file.user.username }}</p>
+    <p><strong>类型：</strong>{{ file.get_file_type_display }}</p>
+    <hr>
+    {% if file.file_path.endswith:".txt" %}
+        <pre>
+        {% with file.file_path as fp %}
+            {% with fp|file_readable as content %}
+                {{ content }}
+            {% endwith %}
+        {% endwith %}
+        </pre>
+    {% else %}
+        <a href="{{ file.file_path }}" target="_blank">下载/查看原文件</a>
+    {% endif %}
+</body>
+</html>

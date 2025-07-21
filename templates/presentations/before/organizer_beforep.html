@@ -115,190 +115,82 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 演讲信息区域 -->
-        <div class="presentation-info">
+<button class="back-btn" onclick="window.location.href='/presentations/organizer/'">← 返回主页</button>
+ <div class="container">
+    <!-- 演讲信息区域 -->
+    <div class="presentation-info">
+        <h1 class="presentation-title">{{ presentation.title }}</h1>
+        <p class="presentation-organizer">组织者：<span>{{ organizer.username }}</span></p>
+        <form method="post" action="/presentations/start/{{ presentation.id }}/" style="display: inline;">
+    {% csrf_token %}
+    <button class="start-btn" type="submit">开始演讲</button>
+</form>
+    </div>
 
-            <h1 class="presentation-title" id="presentationTitle">人工智能前沿技术分享</h1>
-            <p class="presentation-organizer">组织者：<span id="organizerName">王助理</span></p>
-            <button class="start-btn" id="startBtn">开始演讲</button>
+    <!-- 演讲者列表区域 -->
+    <div class="list-section">
+        <div class="list-header">
+            <h2 class="list-title">演讲者列表</h2>
+        <button class="add-btn" type="button"
+        onclick="window.location.href='/presentations/organizer_invite_speaker/{{ presentation.id }}/'">
+    更换演讲者
+</button>
+
         </div>
-
-        <!-- 演讲者列表区域 -->
-        <div class="list-section">
-            <div class="list-header">
-                <h2 class="list-title">演讲者列表</h2>
-      <button class="add-btn" type="button" onclick="window.location.href='/presentations/organizer_invite_speaker'">更换演讲者</button>
-            </div>
-            <div id="speakerList">
-                <!-- JS动态生成 -->
-            </div>
-        </div>
-
-        <!-- 文件列表区域 -->
-        <div class="list-section">
-            <div class="list-header">
-                <h2 class="list-title">演讲文件</h2>
-            </div>
-            <div id="fileList">
-                <!-- JS动态生成 -->
-            </div>
-        </div>
-
-        <!-- 听众列表区域 -->
-        <div class="list-section">
-            <div class="list-header">
-                <h2 class="list-title">听众列表</h2>
-                 <button class="add-btn" type="button" onclick="window.location.href='/presentations/organizer_invite_audience'">添加听众</button>
-            </div>
-            <div id="audienceList">
-                <!-- JS动态生成 -->
-            </div>
+        <div id="speakerList">
+            {% if speaker and speaker.username %}
+                <div class="list-item">
+                    <span class="item-name">{{ speaker.username }}</span>
+                </div>
+            {% else %}
+                <div class="empty-tip">暂无演讲者</div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- 所有JS逻辑放在这里 -->
-    <script>
-        // 模拟数据
-        const presentationData = {
-            id: 1,
-            title: "人工智能前沿技术分享",
-            organizer: "王助理",
-            status: "PENDING"
-        };
+    <!-- 文件列表区域 -->
+    <div class="list-section">
+        <div class="list-header">
+            <h2 class="list-title">演讲文件</h2>
+        </div>
+        <div id="fileList">
+            {% if uploads|length > 0 %}
+                {% for file in uploads %}
+                    <div class="list-item">
+                        <div>
+                            <span class="item-name">{{ file.file_path }}</span>
+                            <span class="item-type">{{ file.get_file_type_display }}</span>
+                            <span class="item-type">by {{ file.user.username }}</span>
+                        </div>
+             <a href="/media/materials/{{ file.file_path }}" target="_blank">查看</a>
 
-        const speakers = [
-            { id: 1, name: "张教授" },
-        ];
-
-        const files = [
-            { id: 1, name: "AI技术概览", type: "PDF" },
-            { id: 2, name: "机器学习模型", type: "PPTX" }
-        ];
-
-        const audiences = [
-            { id: 1, name: "张三" },
-            { id: 2, name: "李四" },
-            { id: 3, name: "王五" },
-            { id: 4, name: "赵六" }
-        ];
-
-        // 初始化页面数据
-        document.addEventListener('DOMContentLoaded', function() {
-            // 设置演讲信息
-            document.getElementById('presentationTitle').textContent = presentationData.title;
-            document.getElementById('organizerName').textContent = presentationData.organizer;
-
-            // 渲染演讲者列表
-            renderSpeakerList();
-
-            // 渲染文件列表
-            renderFileList();
-
-            // 渲染听众列表
-            renderAudienceList();
-
-            // 绑定开始演讲按钮事件
-            document.getElementById('startBtn').addEventListener('click', startPresentation);
-        });
-
-        // 渲染演讲者列表
-        function renderSpeakerList() {
-            const container = document.getElementById('speakerList');
-
-            if (speakers.length === 0) {
-                container.innerHTML = '<div class="empty-tip">暂无演讲者</div>';
-                return;
-            }
-
-            let html = '';
-            speakers.forEach(speaker => {
-                html += `
-                <div class="list-item" data-id="${speaker.id}">
-                    <span class="item-name">${speaker.name}</span>
-                </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        // 渲染文件列表
-        function renderFileList() {
-            const container = document.getElementById('fileList');
-
-            if (files.length === 0) {
-                container.innerHTML = '<div class="empty-tip">暂无文件</div>';
-                return;
-            }
-
-            let html = '';
-            files.forEach(file => {
-                html += `
-                <div class="list-item" data-id="${file.id}">
-                    <div>
-                        <span class="item-name">${file.name}</span>
-                        <span class="item-type">${file.type}</span>
                     </div>
-                    <button class="action-btn view-btn" onclick="viewFile(${file.id})">查看</button>
-                </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
+                {% endfor %}
+            {% else %}
+                <div class="empty-tip">暂无文件</div>
+            {% endif %}
+        </div>
+    </div>
 
-        // 渲染听众列表
-        function renderAudienceList() {
-            const container = document.getElementById('audienceList');
+    <!-- 听众列表区域 -->
+    <div class="list-section">
+        <div class="list-header">
+            <h2 class="list-title">听众列表</h2>
+         <button class="add-btn" type="button" onclick="window.location.href='/presentations/organizer_invite_audience/{{ presentation.id }}/'">管理听众人员</button>
 
-            if (audiences.length === 0) {
-                container.innerHTML = '<div class="empty-tip">暂无听众</div>';
-                return;
-            }
-
-            let html = '';
-            audiences.forEach(audience => {
-                html += `
-                <div class="list-item" data-id="${audience.id}">
-                    <span class="item-name">${audience.name}</span>
-                    <button class="action-btn delete-btn" onclick="deleteAudience(${audience.id})">删除</button>
-                </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        // 开始演讲
-        function startPresentation() {
-            if (confirm('确定要开始这场演讲吗？')) {
-                alert('演讲已开始！');
-                // 实际项目中这里应该是AJAX请求
-                presentationData.status = "LIVE";
-            }
-        }
-
-
-        // 查看文件
-        function viewFile(id) {
-            const file = files.find(f => f.id === id);
-            if (file) {
-                alert(`查看文件: ${file.name}.${file.type.toLowerCase()}`);
-                // 实际项目中这里应该是打开文件预览或下载
-            }
-        }
-
-        // 删除听众
-        function deleteAudience(id) {
-            if (confirm('确定要删除这个听众吗？')) {
-                // 从数组中删除
-                const index = audiences.findIndex(a => a.id === id);
-                if (index !== -1) {
-                    audiences.splice(index, 1);
-                    renderAudienceList();
-                }
-                // 实际项目中这里应该是AJAX请求
-                alert('听众已删除');
-            }
-        }
-    </script>
+        </div>
+        <div id="audienceList">
+            {% if attendees|length > 0 %}
+                {% for user in attendees %}
+                    <div class="list-item">
+                        <span class="item-name">{{ user.username }}</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-tip">暂无听众</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 </body>
 </html>
