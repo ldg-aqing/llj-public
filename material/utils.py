@@ -1,3 +1,4 @@
+import io
 import os
 from pptx import Presentation
 import fitz  # PyMuPDF，用于 PDF 解析
