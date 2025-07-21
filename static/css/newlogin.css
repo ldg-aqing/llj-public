@@ -52,6 +52,25 @@ span {
     /* 动画 */
     animation: myMove 4s linear infinite;
 }
+@keyframes myMove {
+    0% {
+        transform: translateY(0%);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(10%, -1000%);
+    }
+    75% {
+        transform: translate(-20%, -1200%);
+    }
+    99% {
+        opacity: .9;
+    }
+    100% {
+        transform: translateY(-1800%) scale(1.0);
+        opacity: 0;
+    }
+}
 
 
 /* 最外层的大盒子 - 修改为百分比宽度和固定宽高比 */
