@@ -14,6 +14,9 @@ urlpatterns = [
     path('presentations/', include('presentations.urls')),
     path('material/', include('material.urls')),
     path('api/quizzes/', include('quizzes.urls')),
+    path('api/feedbacks/', include('feedback.urls')),
+    path('api/discussions/', include('discussions.urls')),
+
 
 
     path('', lambda request: redirect('/users/login')),  # 访问 / 自动跳转到登录页

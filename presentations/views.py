@@ -37,10 +37,10 @@ def organizer_home(request):
 
     speakers = User.objects.filter(role='SPEAKER')
 
-
     return render(request, 'users/organizer.html', {
         'presentations': presentations,
-        'speakers': speakers  # ✅ 传入模板
+        'speakers': speakers,# ✅ 传入模板
+        'user': user,
     })
 
 def audience_home(request):

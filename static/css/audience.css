@@ -1,0 +1,281 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+
+body {
+    padding: 40px;
+    min-height: 100vh;
+}
+
+
+.container {
+    width: 100%;
+    max-width: 900px;
+    background: rgba(255, 255, 255, 0);
+    border-radius: 28px;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.1),
+        0 12px 30px rgba(0, 0, 0, 0.1),
+        0 0 15px rgba(100, 200, 255, 0.1),
+        0 0 10px rgba(255, 180, 200, 0.1);
+    overflow: hidden;
+    margin: auto;
+    transform: translateY(50px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    position: relative;
+    transition: all 0.5s ease;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(
+        45deg,
+        rgba(150, 210, 255, 0.1),
+        rgba(255, 180, 210, 0.1),
+        rgba(150, 210, 255, 0.1)
+    );
+    background-size: 200% auto;
+    z-index: -1;
+    border-radius: 30px;
+    animation: borderGlow 12s linear infinite;
+    opacity: 0;
+    filter: blur(0px);
+}
+
+@keyframes borderGlow {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    padding: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.user-info {
+    flex-grow: 1;
+    text-align: center;
+    background:
+        linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)),
+        linear-gradient(90deg, rgba(58, 123, 213, 0.8) 0%, rgba(0, 196, 255, 0.8) 50%, rgba(228, 45, 195, 0.8) 100%);
+    padding: 25px 30px;
+    border-radius: 15px;
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow:
+        0 1px 3px rgba(0,0,0,0.3),
+        0 1px 0 rgba(255,255,255,0.1);
+    margin: 0 20px;
+    backdrop-filter: blur(8px);
+    background-size: 200% auto;
+    box-shadow:
+        inset 0 0 0 2px rgba(255,255,255,0.2),
+        0 4px 15px rgba(0,0,0,0.1);
+    opacity: 0;
+    animation:
+        fadeIn 0.5s ease 2s forwards,
+        gradientFlow 4s ease infinite;
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@supports not (backdrop-filter: blur(8px)) {
+    .user-info {
+        background: rgba(58, 123, 213, 0.85);
+    }
+}
+
+
+
+.presentation-list-container {
+    padding: 30px;
+    height: calc(8 * (25px + 28px * 2 + 1px));
+    overflow: hidden;
+    position: relative;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.presentation-list {
+    max-height: 100%;
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding-right: 20px;
+}
+
+.presentation-list::-webkit-scrollbar {
+    display: none;
+}
+.presentation-list {
+    padding: 30px;
+}
+
+.list-title {
+    font-size: 24px;
+    color: #000000;
+    margin-bottom: 35px;
+    padding: 0 15px 0px;
+    letter-spacing: 1px;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+    text-transform: uppercase;
+}
+
+.list-title::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    bottom: 0;
+    width: calc(100% - 30px);
+    height: 3px;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+    border-radius: 3px;
+}
+
+.list-title:hover {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}
+
+.presentation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgb(255, 255, 255);
+    border-radius: 18px;
+    margin-bottom: 25px;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    will-change: transform;
+}
+
+.presentation-item:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.25);
+    background: rgb(219, 247, 255);
+    z-index: 10;
+}
+
+.presentation-details {
+    flex: 1;
+}
+
+.presentation-name {
+    font-size: 22px;
+    color: rgba(0, 0, 0, 0.85);
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.presentation-status {
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.6);
+    letter-spacing: 0.5px;
+}
+
+.enter-btn {
+    background: rgba(64, 114, 235, 0.8);
+    color: white;
+    border: none;
+    padding: 18px 36px;
+    border-radius: 12px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    min-width: 140px;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    will-change: transform;
+}
+
+.enter-btn:hover {
+    background: rgb(85, 32, 241);
+    transform: translateY(-8px) scale(1.15);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+}
+
+.enter-btn:active {
+    transform: translateY(2px) scale(0.98);
+}
+
+.enter-btn:disabled {
+    background: rgba(183, 183, 164, 0.6);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.header .enter-btn {
+    background: #e252c7;
+    padding: 18px 32px;
+    font-size: 18px;
+}
+
+.header .enter-btn:hover {
+    background: rgb(85, 32, 241);
+    transform: translateY(-8px) scale(1.15);
+}
+
+.welcome-popup {
+    padding: 0 15px 10px;
+    background:
+        linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)),
+        linear-gradient(90deg, rgba(58, 123, 213, 1) 0%, rgba(0, 196, 255, 1) 50%, rgba(228, 45, 195, 1) 100%);
+    background-size: 200% auto;
+    animation: gradientFlow 4s ease infinite;
+    color: #ffffff;
+    font-size: 80px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-align: center;
+    text-shadow:
+        0 2px 5px rgba(0,0,0,0.4),
+        0 2px 0 rgba(255,255,255,0.15);
+    border-radius: 20px;
+    box-shadow:
+        inset 0 0 0 3px rgba(255,255,255,0.3),
+        0 8px 30px rgba(0,0,0,0.2);
+    transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 9999;
+    opacity: 1;
+}
+
+.welcome-popup.hide {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+    backdrop-filter: blur(0);
+}
