@@ -1,9 +1,19 @@
+from django.contrib.auth.decorators import login_required
+from rest_framework.decorators import  permission_classes
+from rest_framework.permissions import IsAuthenticated
+import logging
 from users.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from presentations.models import Presentation, PresentationAttendee
 from material.forms import UploadForm
 from uploads.models import Upload
 from django.views.decorators.http import require_POST
+from feedback.models import Feedback
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from quizzes.models import Quiz, QuizOption, QuizSession
+from django.db.models import Case, When, Value, IntegerField
+from django.views.decorators.csrf import csrf_exempt
 def speaker_home(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -34,15 +44,28 @@ def organizer_home(request):
     except User.DoesNotExist:
         return render(request, 'error.html', {'message': '用户不存在或不是演讲者'})
 
-    # 获取该演讲者的所有演讲
-    presentations = Presentation.objects.filter(organizer=user)
+    # --- 加入排序 ---
+    from django.db.models import Case, When, Value, IntegerField
+    status_order = Case(
+        When(status='LIVE', then=Value(0)),
+        When(status='PENDING', then=Value(1)),
+        When(status='FINISHED', then=Value(2)),
+        default=Value(99),
+        output_field=IntegerField(),
+    )
+    presentations = (
+        Presentation.objects
+        .filter(organizer=user)
+        .annotate(status_order=status_order)
+        .order_by('status_order', '-id')
+    )
 
     speakers = User.objects.filter(role='SPEAKER')
 
     return render(request, 'users/organizer.html', {
         'user': user,
         'presentations': presentations,
-        'speakers': speakers  # ✅ 传入模板
+        'speakers': speakers
     })
 
 def audience_home(request):
@@ -207,12 +230,128 @@ def start_presentation(request, presentation_id):
     else:
         # 禁止 GET 访问
         return redirect(f'/presentations/manage/{presentation_id}/')
+
+
 def organizer_during_presentation(request, presentation_id):
+    # 获取演讲
     presentation = get_object_or_404(Presentation, id=presentation_id)
-    # ...其他上下文
+
+    # 获取组织者、演讲者、听众，假定模型有相应字段
+    organizer = presentation.organizer  # User对象
+    speaker = presentation.speaker  # User对象
+    attendees = PresentationAttendee.objects.filter(presentation=presentation)
+    feedbacks = Feedback.objects.filter(presentation=presentation)
+
     return render(request, 'presentations/during/organizer_duringp.html', {
         'presentation': presentation,
-        # ...
+        'organizer': organizer,
+        'speaker': speaker,
+        'attendees': attendees,
+        'feedbacks': feedbacks,
     })
-def audience_during_presentation(request):
-    return render(request, "presentations/during/audience_duringp.html")
+
+def audience_during_presentation(request, presentation_id):
+    # 只传id到模板，其它数据前端AJAX获取
+    return render(request, "presentations/during/audience_duringp.html", {"presentation_id": presentation_id})
+
+@api_view(['GET'])
+def audience_presentation_detail(request, presentation_id):
+    try:
+        presentation = Presentation.objects.get(id=presentation_id)
+        quizzes = Quiz.objects.filter(presentation_id=presentation_id, status__in=['active', 'completed']).annotate(
+            status_order=Case(
+                When(status='active', then=0),
+                When(status='completed', then=1),
+                default=2,
+                output_field=IntegerField(),
+            )
+        ).order_by('status_order', '-id')  # 先按状态，再按id倒序
+        feedbacks = Feedback.objects.filter(presentation_id=presentation_id)
+
+        def get_correct_option_label(quiz):
+            if not quiz.correct_option:
+                return ""
+            options = list(quiz.options.all())
+            try:
+                idx = options.index(quiz.correct_option)
+                return chr(65 + idx)  # A,B,C,D
+            except Exception:
+                return ""
+
+        data = {
+            "presentation": {
+                "id": presentation.id,
+                "title": presentation.title,
+                "organizer": presentation.organizer.username if hasattr(presentation.organizer, "username") else str(
+                    presentation.organizer),
+                "speaker": presentation.speaker.username if hasattr(presentation.speaker, "username") else str(
+                    presentation.speaker),
+                "attendee_count": PresentationAttendee.objects.filter(presentation_id=presentation.id).count(),  # 这里
+            },
+            "feedbacks": [
+                {
+                    "id": fb.id,
+                    "content": fb.reason,   # 这里用reason
+                    "user": fb.user.username,
+                    "time": fb.submitted_at.strftime('%Y-%m-%d %H:%M')
+                }
+                for fb in feedbacks
+            ],
+            "questions": [
+                {
+                    "id": q.id,
+                    "title": f"题目 #{q.id}",
+                    "status": q.status,
+                    "content": q.question,
+                    "options": [
+                        {"id": opt.id, "text": f"{chr(65 + i)}. {opt.option_text}"}
+                        for i, opt in enumerate(q.options.all())
+                    ],
+                    "answer": f"{get_correct_option_label(q)}. {q.correct_option.option_text}" if q.correct_option else "",
+                    "explanation": q.explanation or "",
+                    "discussions": [],
+                    "myAnswer": None
+                }
+                for q in quizzes
+            ]
+        }
+        return Response(data)
+    except Presentation.DoesNotExist:
+        return Response({"error": "演讲不存在"}, status=404)
+
+@csrf_exempt
+@api_view(['POST'])
+def submit_answer_api(request):
+    # 1. 先尝试用 Django 的 session 认证用户
+    user = request.user
+    if not user.is_authenticated:
+        # 2. session 没有，再看 POST 里有没有 user_id
+        user_id = request.data.get('user_id')
+        if not user_id:
+            # 3. 两种方式都没有用户信息，直接返回未登录
+            return Response({'error': '用户未登录'}, status=403)
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'error': '用户不存在'}, status=404)
+
+    # 后面就可以放心使用 user 变量，不会为 None
+    quiz_id = request.data.get('quiz_id')
+    option_id = request.data.get('option_id')
+    if not (quiz_id and option_id):
+        return Response({'error': '参数不全'}, status=400)
+    try:
+        quiz = Quiz.objects.get(id=quiz_id)
+        option = QuizOption.objects.get(id=option_id)
+    except (Quiz.DoesNotExist, QuizOption.DoesNotExist):
+        return Response({'error': '题目或选项不存在'}, status=404)
+
+    session, created = QuizSession.objects.update_or_create(
+        quiz=quiz,
+        user=user,
+        defaults={
+            'selected_option': option,
+            'is_correct': (option == getattr(quiz, 'correct_option', None)),
+        }
+    )
+    return Response({'success': True, 'is_correct': session.is_correct})

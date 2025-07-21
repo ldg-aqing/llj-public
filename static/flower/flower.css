@@ -3,7 +3,7 @@
   position: absolute;  /* 绝对定位 */
   right: 0;           /* 贴紧右侧 */
   top: 50%;           /* 垂直居中 */
-  transform: translateY(-50%); /* 精确垂直居中 */
+  transform: translateY(0%); /* 精确垂直居中 */
   width: 200px;       /* 适当宽度 */
   height: auto;       /* 高度自适应 */
   z-index: 1;         /* 确保在背景层 */
