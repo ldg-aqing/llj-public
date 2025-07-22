@@ -47,7 +47,7 @@ DB_PORT=3306
 DB_NAME=popquiz
 DB_USER=root
 DB_PASSWORD=your-password
-
+DASHSCOPE_API_KEY=your-dashscope-key
 ```
 
 
