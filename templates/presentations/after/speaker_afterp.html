@@ -1,10 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+<h2>反馈列表</h2>
+{% if feedbacks %}
+    {% for fb in feedbacks %}
+        <div style="background:#fafbfc; border-radius:6px; margin-bottom:12px; padding:12px 18px; border:1px solid #eee;">
+            <div><b>{{ fb.user.username }}</b>（{{ fb.submitted_at|date:"Y-m-d H:i" }})</div>
+            <div>类型：{{ fb.category_display_zh }}</div>
+            <div>内容：{{ fb.reason }}</div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>暂无反馈。</p>
+{% endif %}
