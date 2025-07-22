@@ -9,17 +9,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6xc!ihzlh$^a-w1)4r(2g*ftw=!)(qh2es3wfln9na!^7i&+ax'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
-
+# 加载.env文件
 load_dotenv()
+# 从 .env 加载
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-default-key")
+DEBUG = os.getenv("DEBUG", "True") == "True"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+
+# DashScope API Key
 DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -85,14 +85,15 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# 数据库配置
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # 用 mysql
-        'NAME': 'popquiz',                     # 你的数据库名
-        'USER': 'remote_user',                        # 数据库用户名
-        'PASSWORD': 'ljj20040113',           # 数据库密码
-        'HOST': '150.158.10.177',
-        'PORT': '3306',                        # MySQL 默认端口
+        'ENGINE': os.getenv("DB_ENGINE", "django.db.backends.mysql"),
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT", "3306"),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
