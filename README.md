@@ -41,6 +41,13 @@ pip install -r requirements.txt
 
 ```env
 SECRET_KEY=your-secret-key
+DEBUG=True
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=popquiz
+DB_USER=root
+DB_PASSWORD=your-password
+
 ```
 
 
@@ -53,15 +60,8 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-### ✅ 5. 创建超级管理员（用于登录后台）
 
-```bash
-python manage.py createsuperuser
-```
-
-按提示设置用户名、密码、邮箱。
-
-### ✅ 6. 启动服务
+### ✅ 5. 启动服务
 
 ```bash
 python manage.py runserver 0.0.0.0:8000
