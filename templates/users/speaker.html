@@ -22,7 +22,6 @@
 
 
 <head>
-    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>演讲者主页</title>
@@ -37,29 +36,49 @@
             </button>
             <div class="user-info">你好！演讲者 {{ user.username }}</div>
         </div>
-  <div class="emptybox">
 
-   </div>
+
+        <div id="welcome-popup" class="welcome-popup">
+    <div>你好！</div>
+    <div>演讲者 {{ user.username }}</div>
+      </div>
+
         <!-- 演讲列表区 -->
-        <div class="presentation-list">
+        <div class="presentation-list-container">
+            <div class="presentation-list">
+                {% for presentation in presentations %}
+                    <div class="presentation-item">
+                        <div class="presentation-details">
+                            <div class="presentation-name">{{ presentation.title }}</div>
+                            <div class="presentation-status">状态：{{ presentation.get_status_display }}</div>
+                        </div>
 
-            {% for presentation in presentations %}
-                <div class="presentation-item">
-                    <div class="presentation-details">
-                        <div class="presentation-name">{{ presentation.title }}</div>
-                        <div class="presentation-status">状态：{{ presentation.get_status_display }}</div>
+                        {% if presentation.status == 'PENDING' %}
+                            <button class="enter-btn" type="button" onclick="window.location.href='{% url 'upload_material' presentation.speaker.id presentation.id %}'">开始演讲</button>
+                        {% elif presentation.status == 'LIVE' %}
+                            <button class="enter-btn" disabled>进行中</button>
+                        {% elif presentation.status == 'FINISHED' %}
+                            <a href="#" class="enter-btn">查看</a>
+                        {% endif %}
                     </div>
-
-                    {% if presentation.status == 'PENDING' %}
-                        <button class="enter-btn" type="button" onclick="window.location.href='{% url 'upload_material' presentation.speaker.id presentation.id %}'">开始演讲</button>
-                    {% elif presentation.status == 'LIVE' %}
-                        <button class="enter-btn" disabled>进行中</button>
-                    {% elif presentation.status == 'FINISHED' %}
-                        <a href="#" class="enter-btn">查看</a>
-                    {% endif %}
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
     </div>
 </body>
 </html>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+  const popup = document.getElementById('welcome-popup');
+
+  // 显示弹窗
+  popup.style.display = 'block';
+
+  // 3秒后触发缩小消失动画
+  setTimeout(() => {
+    popup.classList.add('hide');
+
+
+  }, 2000); // 显示持续时间
+})
+    </script>
