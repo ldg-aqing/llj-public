@@ -5,34 +5,31 @@
     font-family: 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 }
 
-body {
 
+body {
     padding: 40px;
     min-height: 100vh;
-
 }
 
 
 .container {
-
-    width: 200%;
+    width: 100%;
     max-width: 900px;
-    background: rgba(255, 255, 255, 0); /* 略微增加透明度 */
+    background: rgba(255, 255, 255, 0);
     border-radius: 28px;
     box-shadow:
-        0 0 0 1px rgba(255,255,255,0.1), /* 更细的内边框 */
-        0 12px 30px rgba(0, 0, 0, 0.1),  /* 减淡的主阴影 */
-        0 0 15px rgba(100, 200, 255, 0.1), /* 减淡的蓝光 */
-        0 0 10px rgba(255, 180, 200, 0.1); /* 更柔和的粉光 */
+        0 0 0 1px rgba(255,255,255,0.1),
+        0 12px 30px rgba(0, 0, 0, 0.1),
+        0 0 15px rgba(100, 200, 255, 0.1),
+        0 0 10px rgba(255, 180, 200, 0.1);
     overflow: hidden;
     margin: auto;
-    transform: translateY(50px); /* 向下偏移50px */
+    transform: translateY(50px);
     border: 1px solid rgba(255, 255, 255, 0.25);
     position: relative;
     transition: all 0.5s ease;
 }
 
-/* 更柔和的动态边框 */
 .container::before {
     content: '';
     position: absolute;
@@ -42,24 +39,22 @@ body {
     bottom: -1px;
     background: linear-gradient(
         45deg,
-        rgba(150, 210, 255, 0.1), /* 更淡的浅蓝 */
-        rgba(255, 180, 210, 0.1), /* 更淡的粉红 */
-        rgba(150, 210, 255, 0.1)  /* 更淡的浅蓝 */
+        rgba(150, 210, 255, 0.1),
+        rgba(255, 180, 210, 0.1),
+        rgba(150, 210, 255, 0.1)
     );
     background-size: 200% auto;
     z-index: -1;
     border-radius: 30px;
-    animation: borderGlow 12s linear infinite; /* 速度减半 */
-    opacity: 0; /* 降低透明度 */
-    filter: blur(0px); /* 减小模糊度 */
+    animation: borderGlow 12s linear infinite;
+    opacity: 0;
+    filter: blur(0px);
 }
 
 @keyframes borderGlow {
     0% { background-position: 0% center; }
     100% { background-position: 200% center; }
 }
-
-
 
 .header {
     display: flex;
@@ -68,17 +63,14 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.2);
-
-
-
 }
 
-  .user-info {
+.user-info {
     flex-grow: 1;
     text-align: center;
     background:
-      linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)),
-      linear-gradient(90deg, rgba(58, 123, 213, 0.8) 0%, rgba(0, 196, 255, 0.8) 50%, rgba(228, 45, 195, 0.8) 100%);
+        linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)),
+        linear-gradient(90deg, rgba(58, 123, 213, 0.8) 0%, rgba(0, 196, 255, 0.8) 50%, rgba(228, 45, 195, 0.8) 100%);
     padding: 25px 30px;
     border-radius: 15px;
     color: #ffffff;
@@ -86,67 +78,48 @@ body {
     font-weight: 600;
     letter-spacing: 1px;
     text-shadow:
-      0 1px 3px rgba(0,0,0,0.3),
-      0 1px 0 rgba(255,255,255,0.1);
+        0 1px 3px rgba(0,0,0,0.3),
+        0 1px 0 rgba(255,255,255,0.1);
     margin: 0 20px;
     backdrop-filter: blur(8px);
     background-size: 200% auto;
     box-shadow:
-      inset 0 0 0 2px rgba(255,255,255,0.2),
-      0 4px 15px rgba(0,0,0,0.1);
-
-    /* 新增动画部分 */
+        inset 0 0 0 2px rgba(255,255,255,0.2),
+        0 4px 15px rgba(0,0,0,0.1);
     opacity: 0;
     animation:
-      fadeIn 0.5s ease 2s forwards,
-     gradientFlow 4s ease infinite;
-  }
+        fadeIn 0.5s ease 2s forwards,
+        gradientFlow 4s ease infinite;
+}
 
-  /* 原渐变动画保留 */
-  @keyframes gradientFlow {
+@keyframes gradientFlow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
-  }
+}
 
-  /* 新增淡入动画 */
-  @keyframes fadeIn {
+@keyframes fadeIn {
     from {
-      opacity: 0;
-      transform: translateY(10px);
+        opacity: 0;
+        transform: translateY(10px);
     }
     to {
-      opacity: 1;
-      transform: translateY(0);
+        opacity: 1;
+        transform: translateY(0);
     }
-  }
+}
 
-  /* 兼容性处理 */
-  @supports not (backdrop-filter: blur(8px)) {
+@supports not (backdrop-filter: blur(8px)) {
     .user-info {
-      background: rgba(58, 123, 213, 0.85); /* 降级方案 */
+        background: rgba(58, 123, 213, 0.85);
     }
-  }
-
-.emptybox {
-    padding: 0 15px 240px;
-    border: 4px solid rgba(255, 255, 255, 0.7); /* 4px宽度的黑色实线边框 */
 }
 
 
 
-@keyframes gradientFlow {
-    0% { background-position: 0% center; }
-    50% { background-position: 100% center; }
-    100% { background-position: 0% center; }
-}
-
-
-
-/* 新增的列表容器样式 */
 .presentation-list-container {
     padding: 30px;
-    height: calc(8 * (25px + 28px * 2 + 1px)); /* 计算5个项目的高度 */
+    height: calc(8 * (25px + 28px * 2 + 1px));
     overflow: hidden;
     position: relative;
     backdrop-filter: blur(10px);
@@ -156,33 +129,29 @@ body {
 .presentation-list {
     max-height: 100%;
     overflow-y: auto;
-    scrollbar-width: none; /* 隐藏滚动条 - Firefox */
-    padding-right: 20px; /* 为滚动条留出空间 */
+    scrollbar-width: none;
+    padding-right: 20px;
 }
 
-/* 隐藏滚动条 - Chrome/Safari */
 .presentation-list::-webkit-scrollbar {
     display: none;
 }
-
-
 .presentation-list {
     padding: 30px;
 }
 
 .list-title {
-    font-size: 24px;  /* 增大字号 */
-    color: #000000;   /* 深蓝灰色替代纯黑 */
+    font-size: 24px;
+    color: #000000;
     margin-bottom: 35px;
-    padding: 0 15px 0px; /* 增加下边距 */
+    padding: 0 15px 0px;
     letter-spacing: 1px;
-    font-weight: 600; /* 中等加粗 */
+    font-weight: 600;
     position: relative;
-    display: inline-block; /* 使下划线宽度自适应文字 */
-    text-transform: uppercase; /* 字母大写更显高级 */
+    display: inline-block;
+    text-transform: uppercase;
 }
 
-/* 添加精致下划线效果 */
 .list-title::after {
     content: '';
     position: absolute;
@@ -190,11 +159,10 @@ body {
     bottom: 0;
     width: calc(100% - 30px);
     height: 3px;
-    background: linear-gradient(90deg, #3498db, #9b59b6); /* 蓝紫渐变 */
+    background: linear-gradient(90deg, #3498db, #9b59b6);
     border-radius: 3px;
 }
 
-/* 悬浮动画效果 */
 .list-title:hover {
     text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transform: translateX(5px);
@@ -205,7 +173,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding:  28px 30px;
+    padding: 28px 30px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     background: rgb(255, 255, 255);
     border-radius: 18px;
@@ -271,9 +239,8 @@ body {
     transform: none;
 }
 
-/* 返回登录按钮特殊样式 */
 .header .enter-btn {
-    background: #e252c7 ;
+    background: #e252c7;
     padding: 18px 32px;
     font-size: 18px;
 }
@@ -284,48 +251,31 @@ body {
 }
 
 .welcome-popup {
-  /* 基础布局 */
-        padding: 0 15px 10px;
-
-  /* 背景与渐变 */
-  background:
-    linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)),
-    linear-gradient(90deg, rgba(58, 123, 213, 1) 0%, rgba(0, 196, 255, 1) 50%, rgba(228, 45, 195, 1) 100%);
-  background-size: 200% auto;
-  animation: gradientFlow 4s ease infinite;
-
-  /* 文字样式 */
-  color: #ffffff;
-  font-size: 80px; /* 更大的字体 */
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-align: center;
-  text-shadow:
-    0 2px 5px rgba(0,0,0,0.4),
-    0 2px 0 rgba(255,255,255,0.15);
-
-  /* 边框与阴影 */
-  border-radius: 20px; /* 更大的圆角 */
-  box-shadow:
-    inset 0 0 0 3px rgba(255,255,255,0.3), /* 更粗的内边框 */
-    0 8px 30px rgba(0,0,0,0.2); /* 更强的外阴影 */
-
-  /* 内边距与过渡 */
-  transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-  z-index: 9999;
-  opacity: 1;
+    padding: 0 15px 10px;
+    background:
+        linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)),
+        linear-gradient(90deg, rgba(58, 123, 213, 1) 0%, rgba(0, 196, 255, 1) 50%, rgba(228, 45, 195, 1) 100%);
+    background-size: 200% auto;
+    animation: gradientFlow 4s ease infinite;
+    color: #ffffff;
+    font-size: 80px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-align: center;
+    text-shadow:
+        0 2px 5px rgba(0,0,0,0.4),
+        0 2px 0 rgba(255,255,255,0.15);
+    border-radius: 20px;
+    box-shadow:
+        inset 0 0 0 3px rgba(255,255,255,0.3),
+        0 8px 30px rgba(0,0,0,0.2);
+    transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 9999;
+    opacity: 1;
 }
 
-/* 流动背景动画 */
-@keyframes gradientFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* 缩小消失动画 */
 .welcome-popup.hide {
-  transform: translate(-50%, -50%) scale(0.8);
-  opacity: 0;
-  backdrop-filter: blur(0);
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+    backdrop-filter: blur(0);
 }

@@ -4,10 +4,8 @@ from .views import speaker_home
 from .views import organizer_home
 from .views import audience_home
 from . import views
-from .views import organizer_invite_speaker
-from .views import organizer_invite_audience
 from .views import organizer_during_presentation
-from .views import audience_during_presentation
+from .views import submit_answer_api
 
 urlpatterns = [
     path('speaker/', speaker_home, name='speaker_home'),
@@ -24,10 +22,17 @@ urlpatterns = [
     path('remove_audience/', views.remove_audience, name='remove_audience'),
     path('preview_file/<int:file_id>/', views.preview_file, name='preview_file'),
     path('start/<int:presentation_id>/', views.start_presentation, name='start_presentation'),
-
-#测试用
-
-    path('during/<int:presentation_id>/', views.organizer_during_presentation, name='organizer_during_presentation'),
-    path('audience_during_presentation', audience_during_presentation, name='audience_during_presentation'),
-
+    path('during/<int:presentation_id>/', organizer_during_presentation, name='organizer_during_presentation'),
+    # audience进入演讲页面
+    path(
+        'audience_during_presentation/<int:presentation_id>/',
+        views.audience_during_presentation,
+        name='audience_during_presentation'
+    ),
+    # audience页面AJAX用的API接口
+    path(
+        'api/presentations/audience_detail/<int:presentation_id>/',
+        views.audience_presentation_detail
+    ),
+    path('api/presentations/submit_answer/', submit_answer_api, name='submit_answer_api'),
 ]
