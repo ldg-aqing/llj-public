@@ -80,6 +80,16 @@
     </div>
 
     <script>
+                // 可以添加前端验证或AJAX提交逻辑
+        document.querySelector('.create-form').addEventListener('submit', function(e) {
+            const input = this.querySelector('.presentation-input');
+            if (input.value.trim() === '') {
+                e.preventDefault();
+                alert('请输入演讲名称');
+            }
+        });
+
+
         document.addEventListener('DOMContentLoaded', function() {
             const createSection = document.getElementById('create-section');
 

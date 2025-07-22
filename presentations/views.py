@@ -354,4 +354,5 @@ def submit_answer_api(request):
             'is_correct': (option == getattr(quiz, 'correct_option', None)),
         }
     )
-    return Response({'success': True, 'is_correct': session.is_correct})
+    return Response({'success': True, 'is_correct': session.is_correct ,
+                     'selected_option_id': option.id,})
