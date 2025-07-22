@@ -256,7 +256,6 @@
             padding: 15px;
             background-color: #f8f9fa;
             border-top: 1px solid #e0e0e0;
-            display: none;
         }
 
         .discussion-list {
@@ -359,20 +358,27 @@
         </div>
         <div class="feedback-section">
             <h2 class="section-title">听众反馈</h2>
-            <div class="feedback-form">
-                <input type="text" class="feedback-input" id="feedbackInput" placeholder="请输入您的反馈..." />
-                <button class="submit-btn" id="submitFeedback">提交</button>
-            </div>
-            <ul class="feedback-list" id="feedbackList">
-                <li class="empty-tip">正在加载反馈数据...</li>
-            </ul>
+    <div class="feedback-form">
+        <select id="feedbackCategory" class="feedback-input" style="max-width: 150px;">
+            <option value="">选择反馈类型</option>
+            <option value="SPEAKER">演讲者</option>
+            <option value="QUIZ">题目</option>
+            <option value="ENVIRONMENT">环境</option>
+        </select>
+        <input type="text" class="feedback-input" id="feedbackInput" placeholder="请输入您的反馈..." />
+        <button class="submit-btn" id="submitFeedback">提交</button>
+    </div>
+    <ul class="feedback-list" id="feedbackList">
+        <li class="empty-tip">正在加载反馈数据...</li>
+    </ul>
+      </div>
+    <!-- 问题部分 -->
+    <div class="question-section">
+        <h2 class="section-title">互动题目</h2>
+        <div class="question-list" id="questionList">
+            <div class="empty-tip">正在加载题目数据...</div>
         </div>
-        <div class="question-section">
-            <h2 class="section-title">互动题目</h2>
-            <div class="question-list" id="questionList">
-                <div class="empty-tip">正在加载题目数据...</div>
-            </div>
-        </div>
+    </div>
     </div>
 
     <script>
@@ -392,6 +398,7 @@
             }
             return cookieValue;
         }
+        const user_id = getUserIdFromURL();
         const csrftoken = getCookie('csrftoken');
 
         const presentationId = "{{ presentation_id }}";
@@ -440,65 +447,139 @@
             container.innerHTML = html;
         }
 
-        function loadQuestions() {
-            const container = document.getElementById('questionList');
-            const questions = (pageData.questions || []);
-            if (!questions.length) {
-                container.innerHTML = '<div class="empty-tip">暂无题目</div>';
-                return;
-            }
-            let html = '';
-            questions.forEach(question => {
-                const statusClass = `status-${question.status}`;
-                const statusText = {
-                    'active': '进行中',
-                    'completed': '已结束'
-                }[question.status] || question.status;
+function loadQuestions() {
+            console.log("loadQuestions called", pageData.questions);
+    const container = document.getElementById('questionList');
+    const questions = (pageData.questions || []);
+    if (!questions.length) {
+        container.innerHTML = '<div class="empty-tip">暂无题目</div>';
+        return;
+    }
+    let html = '';
+    questions.forEach(question => {
+        const statusClass = `status-${question.status}`;
+        const statusText = {
+            'active': '进行中',
+            'completed': '已结束'
+        }[question.status] || question.status;
 
-                let optionsHtml = '';
-(question.options || []).forEach((option, index) => {
-    const optionId = option.id;  // 后端给的id
-    optionsHtml += `<li class="question-option">
-      <input type="radio" id="question-${question.id}-option-${index}" name="question-${question.id}" value="${optionId}" data-option-id="${optionId}" class="option-radio" />
-      <label for="question-${question.id}-option-${index}">${option.text}</label>
-    </li>`;
-});
+        let optionsHtml = '';
+        (question.options || []).forEach((option, index) => {
+            const optionId = option.id;
+            optionsHtml += `<li class="question-option">
+                <input type="radio" id="question-${question.id}-option-${index}" name="question-${question.id}" value="${optionId}" data-option-id="${optionId}" class="option-radio" />
+                <label for="question-${question.id}-option-${index}">${option.text}</label>
+            </li>`;
+        });
 
-                let answerSection = '';
-                let explanationSection = '';
-                let actionsHtml = '';
+        let answerSection = '';
+        let explanationSection = '';
+        let actionsHtml = '';
 
-                if (question.status === 'completed') {
-                    answerSection = `<div class="question-answer" style="display: block;">
-                        <span class="answer-label">参考答案:</span>
-                        <span class="answer-text">${question.answer}</span>
-                    </div>
-                    <div class="question-explanation" style="display: block;">
-                        <span class="explanation-label">解析:</span>
-                        <span>${question.explanation}</span>
-                    </div>`;
-                } else if (question.status === 'active') {
-                    actionsHtml = `<div class="question-actions">
-                        <button class="action-btn submit-answer-btn" data-question-id="${question.id}">提交答案</button>
-                    </div>`;
-                }
-
-                html += `<div class="question-box" data-question-id="${question.id}">
-                    <div class="question-header">
-                        <span class="question-title">${question.title}</span>
-                        <span class="question-status ${statusClass}">${statusText}</span>
-                    </div>
-                    <div class="question-content">
-                        <div class="question-text">${question.content}</div>
-                        <ul class="question-options">${optionsHtml}</ul>
-                    </div>
-                    ${answerSection}
-                    ${explanationSection}
-                    ${actionsHtml}
-                </div>`;
-            });
-            container.innerHTML = html;
+        if (question.status === 'completed') {
+            answerSection = `<div class="question-answer" style="display: block;">
+                <span class="answer-label">参考答案:</span>
+                <span class="answer-text">${question.answer}</span>
+            </div>
+            <div class="question-explanation" style="display: block;">
+                <span class="explanation-label">解析:</span>
+                <span>${question.explanation}</span>
+            </div>`;
+        } else if (question.status === 'active') {
+            actionsHtml = `<div class="question-actions">
+                <button class="action-btn submit-answer-btn" data-question-id="${question.id}">提交答案</button>
+            </div>`;
         }
+
+        // === 讨论区部分 ===
+        html += `<div class="question-box" data-question-id="${question.id}">
+            <div class="question-header">
+                <span class="question-title">${question.title}</span>
+                <span class="question-status ${statusClass}">${statusText}</span>
+            </div>
+            <div class="question-content">
+                <div class="question-text">${question.content}</div>
+                <ul class="question-options">${optionsHtml}</ul>
+            </div>
+            ${answerSection}
+            ${explanationSection}
+            ${actionsHtml}
+            <!-- 讨论区 -->
+            <div class="discussion-area" id="discussion-area-${question.id}">
+                <h3 style="margin-bottom:8px;">讨论区</h3>
+                <ul class="discussion-list" id="discussion-list-${question.id}">
+                    <li class="empty-tip">加载中...</li>
+                </ul>
+                <div class="discussion-form">
+                    <input type="text" id="discussion-input-${question.id}" class="discussion-input" placeholder="请输入评论..." />
+                    <button class="submit-btn" onclick="submitComment(${question.id})">提交评论</button>
+                </div>
+            </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+console.log('HTML:', container.innerHTML);
+    // 重点：渲染完每题之后再去加载每题的评论
+    questions.forEach(question => {
+        loadCommentsForQuestion(question.id);
+    });
+}
+
+function loadCommentsForQuestion(quizId) {
+    fetch(`/api/discussions/quiz/${quizId}/comments/`)
+        .then(response => response.json())
+        .then(data => {
+            const ul = document.getElementById(`discussion-list-${quizId}`);
+            if (data.code === 0 && data.data.length > 0) {
+                ul.innerHTML = '';
+                data.data.forEach(comment => {
+                    const li = document.createElement('li');
+                    li.classList.add('discussion-item');
+                    li.innerHTML = `
+                        <div class="discussion-content">${comment.content}</div>
+                        <div class="discussion-user">${comment.user}<br><small>${comment.created_at}</small></div>
+                    `;
+                    ul.appendChild(li);
+                });
+            } else {
+                ul.innerHTML = '<li class="empty-tip">暂无评论</li>';
+            }
+        });
+}
+
+function submitComment(quizId) {
+    const input = document.getElementById(`discussion-input-${quizId}`);
+    const content = input.value.trim();
+    if (!content) {
+        alert('请输入评论内容');
+        return;
+    }
+    fetch(`/api/discussions/quiz/${quizId}/comments/post/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({
+            user_id: user_id,
+            content: content,
+        }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.code === 0) {
+            input.value = '';
+            loadCommentsForQuestion(quizId);
+        } else {
+            alert('评论提交失败: ' + data.msg);
+        }
+    })
+    .catch(() => {
+        alert('提交失败，网络错误');
+    });
+}
+
+
 
         function bindEvents() {
             // 绑定反馈提交
@@ -513,21 +594,53 @@
         }
 
         function submitFeedback() {
-            const input = document.getElementById('feedbackInput');
-            const content = input.value.trim();
-            if (!content) {
-                alert('请输入反馈内容');
-                return;
-            }
-            alert('（示例）提交反馈：' + content);
-        }
-function getUserIdFromURL() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('user_id');
-}
-const user_id = getUserIdFromURL();
+    const input = document.getElementById('feedbackInput');
+    const categorySelect = document.getElementById('feedbackCategory');
+    const content = input.value.trim();
+    const category = categorySelect.value;
 
-function submitAnswer(questionId) {
+    if (!category) {
+        alert('请选择反馈类型');
+        return;
+    }
+    if (!content) {
+        alert('请输入反馈内容');
+        return;
+    }
+
+    fetch(`/api/feedbacks/${presentationId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({
+            category: category,
+            reason: content,
+        }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.code === 0) {
+            alert('反馈提交成功');
+            // 刷新页面
+            window.location.reload();
+        } else {
+            alert('提交失败: ' + data.msg);
+        }
+    })
+    .catch(() => {
+        alert('提交失败，网络错误');
+    });
+}
+
+        function getUserIdFromURL() {
+           const params = new URLSearchParams(window.location.search);
+           return params.get('user_id');
+        }
+
+
+        function submitAnswer(questionId) {
     const selectedInput = document.querySelector(`input[name="question-${questionId}"]:checked`);
     if (!selectedInput) {
         alert('请选择一个选项');
@@ -585,9 +698,6 @@ function submitAnswer(questionId) {
         alert('提交失败，网络错误');
     });
 }
-
-
-
 
     </script>
 </body>
