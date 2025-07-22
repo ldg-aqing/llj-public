@@ -85,8 +85,9 @@ def generate_question_from_text(text):
         raise RuntimeError("Qwen 调用失败：" + str(response))
 
 def save_quiz_from_ai_response(presentation, ai_text):
-    # 先分割为每道题的原文段落
-    raw_questions = re.split(r"\s*题目[一二三四五12345]：\s*", ai_text.strip())
+    print("收到AI返回内容：", ai_text)
+    raw_questions = re.split(r"\s*题目\s*[一二三四五12345]\s*[:：]\s*", ai_text.strip())
+
     quiz_list = []
 
     for qtext in raw_questions:
