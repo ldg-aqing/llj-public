@@ -528,13 +528,14 @@ function getUserIdFromURL() {
 const user_id = getUserIdFromURL();
 
 function submitAnswer(questionId) {
-    const selectedOption = document.querySelector(`input[name="question-${questionId}"]:checked`);
-    if (!selectedOption) {
+    const selectedInput = document.querySelector(`input[name="question-${questionId}"]:checked`);
+    if (!selectedInput) {
         alert('请选择一个选项');
         return;
     }
 
-    const optionId = selectedOption.dataset.optionId;
+    const optionId = selectedInput.dataset.optionId;
+    const selectedInputId = selectedInput.id;
 
     fetch('/presentations/api/presentations/submit_answer/', {
         method: 'POST',
@@ -545,20 +546,37 @@ function submitAnswer(questionId) {
         body: JSON.stringify({
             quiz_id: questionId,
             option_id: optionId,
-            user_id: user_id,  // 这里加上
+            user_id: user_id,
         }),
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            alert('提交成功，答案' + (data.is_correct ? '正确' : '错误'));
-            // 方法二：禁用按钮并改文本
+            alert('提交成功');
+
+            // 禁用按钮
             let btn = document.querySelector(`.submit-answer-btn[data-question-id="${questionId}"]`);
             if (btn) {
                 btn.disabled = true;
                 btn.textContent = '已提交';
                 btn.classList.add('submit-answer-btn-disabled');
             }
+
+            // 找对应的 label，显示“我的答案”
+            const selectedLabel = selectedInputId ? document.querySelector(`label[for="${selectedInputId}"]`) : null;
+            const answerText = selectedLabel ? selectedLabel.textContent : `选项ID:${optionId}`;
+
+            let myAnswerDiv = document.querySelector(`#my-answer-${questionId}`);
+            if (!myAnswerDiv) {
+                const questionBox = document.querySelector(`.question-box[data-question-id="${questionId}"]`);
+                myAnswerDiv = document.createElement('div');
+                myAnswerDiv.id = `my-answer-${questionId}`;
+                myAnswerDiv.className = 'my-answer';
+                questionBox.appendChild(myAnswerDiv);
+            }
+            myAnswerDiv.textContent = '我的答案: ' + answerText;
+            myAnswerDiv.style.display = 'block';
+
         } else {
             alert(data.error || '提交失败');
         }
@@ -567,6 +585,8 @@ function submitAnswer(questionId) {
         alert('提交失败，网络错误');
     });
 }
+
+
 
 
     </script>
