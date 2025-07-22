@@ -64,7 +64,7 @@ python manage.py migrate
 ### ✅ 5. 启动服务
 
 ```bash
-python manage.py runserver 0.0.0.0:8000
+python manage.py runserver
 ```
 
 然后使用浏览器访问：
