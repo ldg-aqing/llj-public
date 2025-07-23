@@ -1,354 +1,22 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>观众页面 - 演讲互动系统</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        body {
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        /* 演讲信息区域 */
-        .presentation-info {
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .presentation-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .presentation-meta {
-            display: flex;
-            gap: 20px;
-            font-size: 16px;
-            color: #666;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-        }
-
-        .meta-label {
-            font-weight: 500;
-            margin-right: 5px;
-        }
-
-        /* 反馈区域 */
-        .feedback-section {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .section-title::before {
-            content: "";
-            display: inline-block;
-            width: 4px;
-            height: 16px;
-            background-color: #4285f4;
-            margin-right: 8px;
-            border-radius: 2px;
-        }
-
-        .feedback-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .feedback-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        .feedback-input:focus {
-            border-color: #4285f4;
-        }
-
-        .submit-btn {
-            padding: 10px 20px;
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 15px;
-        }
-
-        .submit-btn:hover {
-            background-color: #3367d6;
-        }
-
-        .feedback-list {
-            list-style: none;
-        }
-
-        .feedback-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .feedback-item:last-child {
-            border-bottom: none;
-        }
-
-        .feedback-content {
-            flex: 1;
-            font-size: 15px;
-            color: #333;
-        }
-
-        .feedback-user {
-            width: 120px;
-            text-align: right;
-            font-size: 14px;
-            color: #666;
-        }
-
-        /* 题目区域 */
-        .question-section {
-            padding: 15px;
-        }
-
-        .question-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .question-box {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .question-header {
-            padding: 12px 15px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .question-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .question-status {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status-active {
-            background-color: #e6f4ea;
-            color: #34a853;
-        }
-
-        .status-completed {
-            background-color: #f1f3f4;
-            color: #5f6368;
-        }
-
-        .question-content {
-            padding: 15px;
-        }
-
-        .question-text {
-            font-size: 15px;
-            color: #333;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .question-options {
-            list-style: none;
-            margin-left: 20px;
-        }
-
-        .question-option {
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #555;
-            display: flex;
-            align-items: center;
-        }
-
-        .option-radio {
-            margin-right: 10px;
-        }
-
-        .question-answer {
-            padding: 12px 15px;
-            background-color: #f8f9fa;
-            border-top: 1px dashed #e0e0e0;
-            font-size: 14px;
-            display: none;
-        }
-
-        .answer-label {
-            font-weight: 600;
-            color: #333;
-            margin-right: 8px;
-        }
-
-        .answer-text {
-            color: #34a853;
-        }
-
-        .question-explanation {
-            padding: 12px 15px;
-            font-size: 14px;
-            color: #666;
-            border-top: 1px dashed #e0e0e0;
-            display: none;
-        }
-
-        .explanation-label {
-            font-weight: 600;
-            color: #333;
-            margin-right: 8px;
-        }
-
-        .discussion-area {
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .discussion-list {
-            list-style: none;
-            margin-top: 10px;
-        }
-
-        .discussion-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .discussion-item:last-child {
-            border-bottom: none;
-        }
-
-        .discussion-content {
-            flex: 1;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .discussion-user {
-            width: 120px;
-            text-align: right;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .discussion-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .discussion-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .discussion-input:focus {
-            border-color: #4285f4;
-        }
-
-        .question-actions {
-            padding: 12px 15px;
-            display: flex;
-            justify-content: flex-end;
-            border-top: 1px solid #f0f0f0;
-        }
-
-        .action-btn {
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            border: none;
-            min-width: 80px;
-            text-align: center;
-        }
-
-        .submit-answer-btn {
-            background-color: #4285f4;
-            color: white;
-        }
-
-        .empty-tip {
-            text-align: center;
-            color: #999;
-            padding: 20px 0;
-            font-size: 14px;
-        }
-
-        .my-answer {
-            padding: 8px 12px;
-            background-color: #e8f0fe;
-            border-radius: 4px;
-            font-size: 14px;
-            color: #4285f4;
-            margin-top: 10px;
-            display: none;
-        }
-    </style>
+        <link rel="stylesheet" href="{% static 'css/audience_duringp.css' %}">
 </head>
 <body>
     <div class="container">
         <div class="presentation-info">
+    <button class="home-button" onclick="window.location.href='/presentations/audience/'">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+        </svg>
+        <span>返回主页</span>
+    </button>
             <h1 class="presentation-title" id="presentationTitle">加载中...</h1>
             <div class="presentation-meta">
                 <div class="meta-item"><span class="meta-label">组织者:</span> <span id="organizerName">加载中...</span></div>
@@ -360,7 +28,7 @@
             <h2 class="section-title">听众反馈</h2>
     <div class="feedback-form">
         <select id="feedbackCategory" class="feedback-input" style="max-width: 150px;">
-            <option value="">选择反馈类型</option>
+            <option value="">反馈类型</option>
             <option value="SPEAKER">演讲者</option>
             <option value="QUIZ">题目</option>
             <option value="ENVIRONMENT">环境</option>
@@ -368,95 +36,109 @@
         <input type="text" class="feedback-input" id="feedbackInput" placeholder="请输入您的反馈..." />
         <button class="submit-btn" id="submitFeedback">提交</button>
     </div>
-    <ul class="feedback-list" id="feedbackList">
-        <li class="empty-tip">正在加载反馈数据...</li>
-    </ul>
+<ul class="feedback-list" id="feedbackList">
+    <li class="empty-tip">正在加载反馈数据...</li>
+</ul>
       </div>
-    <!-- 问题部分 -->
+ <!-- 问题部分 -->
     <div class="question-section">
-        <h2 class="section-title">互动题目</h2>
-        <div class="question-list" id="questionList">
-            <div class="empty-tip">正在加载题目数据...</div>
-        </div>
+    <h2 class="section-title">互动题目</h2>
+    <div class="question-list" id="questionList">
+        <!-- 这里会动态生成单题容器 -->
+    </div>
+    <div class="question-navigation">
+        <button class="nav-btn" id="prevQuestionBtn" disabled>上一题</button>
+        <div class="question-counter" id="questionCounter">0/0</div>
+        <button class="nav-btn" id="nextQuestionBtn" disabled>下一题</button>
+    </div>
     </div>
     </div>
 
     <script>
 
-        // 获取CSRF Token的通用方法
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    cookie = cookie.trim();
-                    if (cookie.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
+// 获取CSRF Token的通用方法
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
-            return cookieValue;
         }
-        const user_id = getUserIdFromURL();
-        const csrftoken = getCookie('csrftoken');
+    }
+    return cookieValue;
+}
 
-        const presentationId = "{{ presentation_id }}";
-        console.log("presentationId from template:", presentationId);
+const user_id = getUserIdFromURL();
+const csrftoken = getCookie('csrftoken');
+const presentationId = "{{ presentation_id }}";
+console.log("presentationId from template:", presentationId);
 
-        let pageData = {};
+let pageData = {};
+let currentQuestionIndex = 0;
+let questions = [];
 
-        document.addEventListener('DOMContentLoaded', function () {
-            fetch(`/presentations/api/presentations/audience_detail/${presentationId}/`)
-                .then(res => res.json())
-                .then(data => {
-                    pageData = data;
-                    loadPresentationData();
-                    loadFeedbacks();
-                    loadQuestions();
-                    bindEvents();
-                })
-                .catch(() => {
-                    document.getElementById('presentationTitle').textContent = "加载失败";
-                    document.getElementById('questionList').innerHTML = '<div class="empty-tip">获取数据失败</div>';
-                });
+document.addEventListener('DOMContentLoaded', function () {
+    fetch(`/presentations/api/presentations/audience_detail/${presentationId}/`)
+        .then(res => res.json())
+        .then(data => {
+            pageData = data;
+            loadPresentationData();
+            loadFeedbacks();
+            loadQuestions();
+            bindEvents();
+        })
+        .catch(() => {
+            document.getElementById('presentationTitle').textContent = "加载失败";
+            document.getElementById('questionList').innerHTML = '<div class="empty-tip">获取数据失败</div>';
         });
+});
 
-        function loadPresentationData() {
-            const p = pageData.presentation || {};
-            document.getElementById('presentationTitle').textContent = p.title || '';
-            document.getElementById('organizerName').textContent = p.organizer || '';
-            document.getElementById('speakerName').textContent = p.speaker || '';
-            document.getElementById('attendeeCount').textContent = p.attendee_count || '0';
-        }
+function loadPresentationData() {
+    const p = pageData.presentation || {};
+    document.getElementById('presentationTitle').textContent = p.title || '';
+    document.getElementById('organizerName').textContent = p.organizer || '';
+    document.getElementById('speakerName').textContent = p.speaker || '';
+    document.getElementById('attendeeCount').textContent = p.attendee_count || '0';
+}
 
-        function loadFeedbacks() {
-            const container = document.getElementById('feedbackList');
-            const feedbacks = pageData.feedbacks || [];
-            if (!feedbacks.length) {
-                container.innerHTML = '<div class="empty-tip">暂无反馈</div>';
-                return;
-            }
-            let html = '';
-            feedbacks.forEach(feedback => {
-                html += `<li class="feedback-item">
-                    <div class="feedback-content">${feedback.content}</div>
-                    <div class="feedback-user">${feedback.user}<br><small>${feedback.time}</small></div>
-                </li>`;
-            });
-            container.innerHTML = html;
-        }
-
-function loadQuestions() {
-            console.log("loadQuestions called", pageData.questions);
-    const container = document.getElementById('questionList');
-    const questions = (pageData.questions || []);
-    if (!questions.length) {
-        container.innerHTML = '<div class="empty-tip">暂无题目</div>';
+function loadFeedbacks() {
+    const container = document.getElementById('feedbackList');
+    const feedbacks = pageData.feedbacks || [];
+    if (!feedbacks.length) {
+        container.innerHTML = '<div class="empty-tip">暂无反馈</div>';
         return;
     }
     let html = '';
-    questions.forEach(question => {
+    feedbacks.forEach(feedback => {
+        html += `<li class="feedback-item">
+            <div class="feedback-content">${feedback.content}</div>
+            <div class="feedback-user">${feedback.user}<br><small>${feedback.time}</small></div>
+        </li>`;
+    });
+    container.innerHTML = html;
+}
+
+function loadQuestions() {
+    console.log("loadQuestions called", pageData.questions);
+    const container = document.getElementById('questionList');
+    questions = (pageData.questions || []);
+
+    if (!questions.length) {
+        container.innerHTML = '<div class="empty-tip">暂无题目</div>';
+        document.getElementById('prevQuestionBtn').disabled = true;
+        document.getElementById('nextQuestionBtn').disabled = true;
+        return;
+    }
+
+    // 清空容器
+    container.innerHTML = '';
+
+    // 为每个问题创建容器
+    questions.forEach((question, index) => {
         const statusClass = `status-${question.status}`;
         const statusText = {
             'active': '进行中',
@@ -491,38 +173,71 @@ function loadQuestions() {
             </div>`;
         }
 
-        // === 讨论区部分 ===
-        html += `<div class="question-box" data-question-id="${question.id}">
-            <div class="question-header">
-                <span class="question-title">${question.title}</span>
-                <span class="question-status ${statusClass}">${statusText}</span>
-            </div>
-            <div class="question-content">
-                <div class="question-text">${question.content}</div>
-                <ul class="question-options">${optionsHtml}</ul>
-            </div>
-            ${answerSection}
-            ${explanationSection}
-            ${actionsHtml}
-            <!-- 讨论区 -->
-            <div class="discussion-area" id="discussion-area-${question.id}">
-                <h3 style="margin-bottom:8px;">讨论区</h3>
-                <ul class="discussion-list" id="discussion-list-${question.id}">
-                    <li class="empty-tip">加载中...</li>
-                </ul>
-                <div class="discussion-form">
-                    <input type="text" id="discussion-input-${question.id}" class="discussion-input" placeholder="请输入评论..." />
-                    <button class="submit-btn" onclick="submitComment(${question.id})">提交评论</button>
+        const questionHtml = `
+        <div class="single-question-container" data-question-index="${index}" data-question-id="${question.id}">
+            <div class="question-box">
+                <div class="question-header">
+                    <span class="question-title">${question.title}</span>
+                    <span class="question-status ${statusClass}">${statusText}</span>
                 </div>
+                <div class="question-content">
+                    <div class="question-text">${question.content}</div>
+                    <ul class="question-options">${optionsHtml}</ul>
+                </div>
+                ${answerSection}
+                ${explanationSection}
+                ${actionsHtml}
+                <!-- 讨论区 -->
+<div class="discussion-area" id="discussion-area-${question.id}">
+    <h3 style="margin-bottom:8px;">讨论区</h3>
+    <ul class="discussion-list" id="discussion-list-${question.id}">
+        <li class="empty-tip">加载中...</li>
+    </ul>
+    <div class="discussion-form">
+        <input type="text" id="discussion-input-${question.id}" class="discussion-input" placeholder="请输入评论..." />
+        <button class="submit-btn" onclick="submitComment(${question.id})">提交评论</button>
+    </div>
+</div>
             </div>
         </div>`;
+
+        container.insertAdjacentHTML('beforeend', questionHtml);
     });
-    container.innerHTML = html;
-console.log('HTML:', container.innerHTML);
-    // 重点：渲染完每题之后再去加载每题的评论
-    questions.forEach(question => {
-        loadCommentsForQuestion(question.id);
+
+    // 更新导航状态
+    updateQuestionNavigation();
+
+    // 显示第一题
+    showQuestion(0);
+}
+
+function showQuestion(index) {
+    currentQuestionIndex = index;
+
+    // 隐藏所有问题
+    document.querySelectorAll('.single-question-container').forEach(container => {
+        container.classList.remove('active');
     });
+
+    // 显示当前问题
+    const currentQuestion = document.querySelector(`.single-question-container[data-question-index="${index}"]`);
+    if (currentQuestion) {
+        currentQuestion.classList.add('active');
+        // 加载该问题的评论
+        const questionId = currentQuestion.dataset.questionId;
+        loadCommentsForQuestion(questionId);
+    }
+
+    // 更新计数器
+    document.getElementById('questionCounter').textContent = `${index + 1}/${questions.length}`;
+
+    // 更新导航按钮状态
+    updateQuestionNavigation();
+}
+
+function updateQuestionNavigation() {
+    document.getElementById('prevQuestionBtn').disabled = currentQuestionIndex <= 0;
+    document.getElementById('nextQuestionBtn').disabled = currentQuestionIndex >= questions.length - 1;
 }
 
 function loadCommentsForQuestion(quizId) {
@@ -579,21 +294,33 @@ function submitComment(quizId) {
     });
 }
 
+function bindEvents() {
+    // 绑定反馈提交
+    document.getElementById('submitFeedback').addEventListener('click', submitFeedback);
 
-
-        function bindEvents() {
-            // 绑定反馈提交
-            document.getElementById('submitFeedback').addEventListener('click', submitFeedback);
-            // 绑定答题提交
-            document.addEventListener('click', function (e) {
-                if (e.target.classList.contains('submit-answer-btn')) {
-                    const questionId = parseInt(e.target.getAttribute('data-question-id'));
-                    submitAnswer(questionId);
-                }
-            });
+    // 绑定答题提交
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('submit-answer-btn')) {
+            const questionId = parseInt(e.target.getAttribute('data-question-id'));
+            submitAnswer(questionId);
         }
+    });
 
-        function submitFeedback() {
+    // 绑定导航按钮
+    document.getElementById('prevQuestionBtn').addEventListener('click', () => {
+        if (currentQuestionIndex > 0) {
+            showQuestion(currentQuestionIndex - 1);
+        }
+    });
+
+    document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+        if (currentQuestionIndex < questions.length - 1) {
+            showQuestion(currentQuestionIndex + 1);
+        }
+    });
+}
+
+function submitFeedback() {
     const input = document.getElementById('feedbackInput');
     const categorySelect = document.getElementById('feedbackCategory');
     const content = input.value.trim();
@@ -634,13 +361,12 @@ function submitComment(quizId) {
     });
 }
 
-        function getUserIdFromURL() {
-           const params = new URLSearchParams(window.location.search);
-           return params.get('user_id');
-        }
+function getUserIdFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('user_id');
+}
 
-
-        function submitAnswer(questionId) {
+function submitAnswer(questionId) {
     const selectedInput = document.querySelector(`input[name="question-${questionId}"]:checked`);
     if (!selectedInput) {
         alert('请选择一个选项');
@@ -675,7 +401,7 @@ function submitComment(quizId) {
                 btn.classList.add('submit-answer-btn-disabled');
             }
 
-            // 找对应的 label，显示“我的答案”
+            // 找对应的 label，显示"我的答案"
             const selectedLabel = selectedInputId ? document.querySelector(`label[for="${selectedInputId}"]`) : null;
             const answerText = selectedLabel ? selectedLabel.textContent : `选项ID:${optionId}`;
 

@@ -8,12 +8,13 @@ from presentations.models import Presentation, PresentationAttendee
 from material.forms import UploadForm
 from uploads.models import Upload
 from django.views.decorators.http import require_POST
-from feedback.models import Feedback
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from quizzes.models import Quiz, QuizOption, QuizSession
 from django.db.models import Case, When, Value, IntegerField
 from django.views.decorators.csrf import csrf_exempt
+from feedback.models import Feedback
+from discussions.models import Discussion, Comment
 def speaker_home(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -356,3 +357,82 @@ def submit_answer_api(request):
     )
     return Response({'success': True, 'is_correct': session.is_correct ,
                      'selected_option_id': option.id,})
+
+
+
+
+def audience_after_view(request, presentation_id, user_id):
+    # 获取演讲对象
+    presentation = get_object_or_404(Presentation, id=presentation_id)
+    # 根据 user_id 获取用户对象
+    user = get_object_or_404(User, id=user_id)
+
+    # 获取该演讲所有反馈（如果需要过滤公开，确保category值正确）
+    feedbacks = Feedback.objects.filter(presentation=presentation)
+
+    # 获取该演讲的所有题目
+    quizzes = Quiz.objects.filter(presentation=presentation).order_by('id')
+    # 获取该用户针对这些题目的答题记录
+    user_sessions = QuizSession.objects.filter(user=user, quiz__in=quizzes)
+
+    quiz_data = []
+    for quiz in quizzes:
+        # 获取题目所有选项并标记 A B C D ...
+        options = QuizOption.objects.filter(quiz=quiz).order_by('id')
+        option_list = []
+        for i, opt in enumerate(options):
+            option_list.append({
+                'label': chr(65 + i),  # 'A', 'B', 'C', 'D'
+                'text': opt.option_text,
+                'id': opt.id,
+            })
+
+        # 获取该用户这题的答题记录
+        session = user_sessions.filter(quiz=quiz).first()
+
+        # 找用户选项对应的字母
+        selected_label = None
+        if session and session.selected_option:
+            for opt in option_list:
+                if opt['id'] == session.selected_option.id:
+                    selected_label = opt['label']
+                    break
+
+        # 找正确选项对应的字母
+        correct_label = None
+        if quiz.correct_option:
+            for opt in option_list:
+                if opt['id'] == quiz.correct_option.id:
+                    correct_label = opt['label']
+                    break
+
+        # 拼接显示文字
+        selected_option_text = (selected_label + ". " if selected_label else "") + (
+            session.selected_option.option_text if session and session.selected_option else "")
+        correct_option_text = (correct_label + ". " if correct_label else "") + (
+            quiz.correct_option.option_text if quiz.correct_option else "")
+
+        # 关联查询该题对应的讨论和评论
+        try:
+            discussion = Discussion.objects.get(quiz=quiz)
+            comments = Comment.objects.filter(discussion=discussion).order_by('created_at')
+        except Discussion.DoesNotExist:
+            comments = []
+
+        quiz_data.append({
+            'quiz': quiz,
+            'options': option_list,
+            'selected_option_text': selected_option_text,
+            'correct_option_text': correct_option_text,
+            'is_correct': session.is_correct if session else None,
+            'explanation': quiz.explanation or "",
+            'comments': comments,  # 评论列表
+        })
+
+    context = {
+        'presentation': presentation,
+        'feedbacks': feedbacks,
+        'quiz_data': quiz_data,
+    }
+
+    return render(request, 'presentations/after/audience_afterp.html', context)

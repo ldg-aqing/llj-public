@@ -62,8 +62,7 @@
                  进入演讲
           </button>
                         {% elif presentation.status == 'FINISHED' %}
-                      <a href="/api/feedbacks/report/audience/{{ presentation.id }}/" class="enter-btn">查看报告</a>
-
+                     <a href="{% url 'audience_after' presentation.id user.id %}" class="enter-btn">查看报告</a>
                         {% else %}
                             <button class="enter-btn" disabled>待开始</button>
                         {% endif %}
