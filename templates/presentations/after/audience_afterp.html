@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+<h1>观众报告：{{ presentation.title }}</h1>
+<h2>公开反馈</h2>
+{% for fb in feedbacks %}
+    <div>
+        类型：{{ fb.get_category_display }}<br>
+        内容：{{ fb.reason }}
+    </div>
+    <hr>
+{% empty %}
+    <p>暂无反馈。</p>
+{% endfor %}
