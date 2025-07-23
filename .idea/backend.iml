@@ -19,7 +19,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
       <excludeFolder url="file://$MODULE_DIR$/media/temp" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10 (llj-public)" jdkType="Python SDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jquery-latest" level="application" />
     <orderEntry type="library" name="jquery-latest" level="application" />
