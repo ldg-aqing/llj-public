@@ -27,8 +27,9 @@ Thumbs.db
 .env
 
 # 静态/媒体文件
-media/
-staticfiles/
+/media/*
+!/media/.gitkeep
+/staticfiles/
 
 # 迁移缓存（可选）
 *.pot
