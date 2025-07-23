@@ -319,7 +319,7 @@
             {% if feedbacks %}
                 {% for fb in feedbacks %}
                     <li class="feedback-item">
-                        <div class="feedback-content">{{ fb.content }}</div>
+                        <div class="feedback-content">{{ fb.reason}}</div>
                         <div class="feedback-user">
                             {{ fb.user.username }}<br>
                             <small>{{ fb.created_at|date:"Y-m-d H:i" }}</small>
@@ -353,76 +353,116 @@
         loadQuestions();
     });
 
-    function loadQuestions() {
-        const container = document.getElementById('questionList');
-        container.innerHTML = '<div class="empty-tip">正在加载题目数据...</div>';
-        fetch(`/api/quizzes/list/${presentationId}/`)
-            .then(res => res.json())
-            .then(questions => {
-                if (!questions.length) {
-                    container.innerHTML = '<div class="empty-tip">暂无题目</div>';
-                    return;
-                }
-                // 按状态排序
-                const statusOrder = { 'active': 1, 'upcoming': 2, 'completed': 3 };
-                questions.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-                let html = '';
-                questions.forEach(question => {
-                    const statusClass = `status-${question.status}`;
-                    const statusText = {
-                        'active': '进行中',
-                        'upcoming': '未开始',
-                        'completed': '已结束'
-                    }[question.status] || question.status;
+ function loadQuestions() {
+    const container = document.getElementById('questionList');
+    container.innerHTML = '<div class="empty-tip">正在加载题目数据...</div>';
+    fetch(`/api/quizzes/list/${presentationId}/`)
+        .then(res => res.json())
+        .then(questions => {
+            if (!questions.length) {
+                container.innerHTML = '<div class="empty-tip">暂无题目</div>';
+                return;
+            }
+            const statusOrder = { 'active': 1, 'upcoming': 2, 'completed': 3 };
+            questions.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+            let html = '';
+            questions.forEach(question => {
+                const statusClass = `status-${question.status}`;
+                const statusText = {
+                    'active': '进行中',
+                    'upcoming': '未开始',
+                    'completed': '已结束'
+                }[question.status] || question.status;
 
-                    let optionsHtml = '';
-                    (question.options || []).forEach(option => {
-                        if (typeof option === 'string') {
-                            optionsHtml += `<li class="question-option">${option}</li>`;
-                        } else if (typeof option === 'object') {
-                            optionsHtml += `<li class="question-option">${option.text || option.option_text}</li>`;
-                        }
-                    });
-
-                    let actionsHtml = '';
-                    if (question.status === 'active') {
-                        actionsHtml = `<button class="action-btn close-btn" onclick="closeQuestion(${question.id})">收卷</button>`;
-                    } else if (question.status === 'upcoming') {
-                        actionsHtml = `<button class="action-btn publish-btn" onclick="publishQuestion(${question.id})">发布</button>`;
+                let optionsHtml = '';
+                (question.options || []).forEach(option => {
+                    if (typeof option === 'string') {
+                        optionsHtml += `<li class="question-option">${option}</li>`;
+                    } else if (typeof option === 'object') {
+                        optionsHtml += `<li class="question-option">${option.text || option.option_text}</li>`;
                     }
-
-                    html += `
-                    <div class="question-box" data-question-id="${question.id}">
-                        <div class="question-header">
-                            <span class="question-title">${question.title || '题目'}</span>
-                            <span class="question-status ${statusClass}">${statusText}</span>
-                        </div>
-                        <div class="question-content">
-                            <div class="question-text">${question.content || ''}</div>
-                            <ul class="question-options">${optionsHtml}</ul>
-                        </div>
-                        <div class="question-answer">
-                            <span class="answer-label">参考答案:</span>
-                            <span class="answer-text">${question.answer || ""}</span>
-                        </div>
-                        <div class="question-explanation">
-                            <span class="explanation-label">解析:</span>
-                            <span>${question.explanation || ""}</span>
-                        </div>
-                        ${actionsHtml ? `
-                        <div class="question-actions">
-                            ${actionsHtml}
-                        </div>
-                        ` : ''}
-                    </div>
-                    `;
                 });
-                container.innerHTML = html;
-            })
-            .catch(err => {
-                container.innerHTML = '<div class="empty-tip">获取题目失败</div>';
+
+                let actionsHtml = '';
+                if (question.status === 'active') {
+                    actionsHtml = `<button class="action-btn close-btn" onclick="closeQuestion(${question.id})">收卷</button>`;
+                } else if (question.status === 'upcoming') {
+                    actionsHtml = `<button class="action-btn publish-btn" onclick="publishQuestion(${question.id})">发布</button>`;
+                }
+
+                // 加：每题评论区占位
+                html += `
+                <div class="question-box" data-question-id="${question.id}">
+                    <div class="question-header">
+                        <span class="question-title">${question.title || '题目'}</span>
+                        <span class="question-status ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="question-content">
+                        <div class="question-text">${question.content || ''}</div>
+                        <ul class="question-options">${optionsHtml}</ul>
+                    </div>
+                    <div class="question-answer">
+                        <span class="answer-label">参考答案:</span>
+                        <span class="answer-text">${question.answer || ""}</span>
+                    </div>
+                    <div class="question-explanation">
+                        <span class="explanation-label">解析:</span>
+                        <span>${question.explanation || ""}</span>
+                    </div>
+                    ${actionsHtml ? `
+                    <div class="question-actions">
+                        ${actionsHtml}
+                    </div>
+                    ` : ''}
+                    <!-- 讨论区（只读展示，不含评论框） -->
+                    <div class="discussion-area" id="discussion-area-${question.id}">
+                        <h3 style="margin-bottom:8px;">讨论区</h3>
+                        <ul class="discussion-list" id="discussion-list-${question.id}">
+                            <li class="empty-tip">正在加载评论...</li>
+                        </ul>
+                    </div>
+                </div>
+                `;
             });
-    }
+            container.innerHTML = html;
+            // 新增：加载每道题的评论
+            questions.forEach(q => {
+                loadCommentsForQuestion(q.id);
+            });
+        })
+        .catch(err => {
+            container.innerHTML = '<div class="empty-tip">获取题目失败</div>';
+        });
+}
+
+function loadCommentsForQuestion(quizId) {
+    fetch(`/api/discussions/quiz/${quizId}/comments/`)
+        .then(response => response.json())
+        .then(data => {
+            const ul = document.getElementById(`discussion-list-${quizId}`);
+            if (ul) {
+                if (data.code === 0 && data.data.length > 0) {
+                    ul.innerHTML = '';
+                    data.data.forEach(comment => {
+                        const li = document.createElement('li');
+                        li.classList.add('discussion-item');
+                        li.innerHTML = `
+                            <div class="discussion-content">${comment.content}</div>
+                            <div class="discussion-user">${comment.user}<br><small>${comment.created_at}</small></div>
+                        `;
+                        ul.appendChild(li);
+                    });
+                } else {
+                    ul.innerHTML = '<li class="empty-tip">暂无评论</li>';
+                }
+            }
+        })
+        .catch(() => {
+            const ul = document.getElementById(`discussion-list-${quizId}`);
+            if (ul) ul.innerHTML = '<li class="empty-tip">加载评论失败</li>';
+        });
+}
+
 
     // 发布题目
 function publishQuestion(questionId) {

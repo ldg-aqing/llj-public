@@ -1,10 +1,11 @@
+from django.db.models import Count
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from uploads.models import Upload
 from .services import generate_question_from_text, save_quiz_from_ai_response
 from presentations.models import Presentation
-from quizzes.models import Quiz, QuizOption
+from quizzes.models import Quiz, QuizOption, QuizSession
 from django.http import JsonResponse
 @api_view(['POST'])
 def generate_ai_quiz(request, presentation_id):
@@ -91,3 +92,52 @@ def get_correct_option_label(quiz):
             return chr(65 + index)  # A, B, C, D
         except ValueError:
             return None
+
+
+@api_view(['GET'])
+def quiz_statistics(request, presentation_id):
+    quizzes = Quiz.objects.filter(presentation_id=presentation_id)
+    result = []
+    total_accuracy = 0
+    count_with_answers = 0  # 只统计有作答的题目用于平均值
+
+    for quiz in quizzes:
+        sessions = QuizSession.objects.filter(quiz=quiz)
+        total_answers = sessions.count()
+        correct_answers = sessions.filter(is_correct=True).count()
+
+        # 每个选项被选择次数
+        option_stats = sessions.values('selected_option__id').annotate(count=Count('id'))
+        option_count_map = {stat['selected_option__id']: stat['count'] for stat in option_stats}
+
+        options_result = []
+        options = quiz.options.all()
+        for i, opt in enumerate(options):
+            label = chr(65 + i)
+            options_result.append({
+                "label": label,
+                "text": opt.option_text,
+                "count": option_count_map.get(opt.id, 0)
+            })
+
+        accuracy = round(correct_answers / total_answers, 2) if total_answers > 0 else None
+        if accuracy is not None:
+            total_accuracy += accuracy
+            count_with_answers += 1
+
+        result.append({
+            "quiz_id": quiz.id,
+            "question": quiz.question,
+            "total_answers": total_answers,
+            "correct_answers": correct_answers,
+            "accuracy": accuracy,
+            "options": options_result
+        })
+
+    average_accuracy = round(total_accuracy / count_with_answers, 2) if count_with_answers > 0 else None
+
+    return Response({
+        "presentation_id": presentation_id,
+        "average_accuracy": average_accuracy,
+        "quizzes": result
+    })
