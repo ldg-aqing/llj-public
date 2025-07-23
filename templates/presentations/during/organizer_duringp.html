@@ -319,7 +319,7 @@
             {% if feedbacks %}
                 {% for fb in feedbacks %}
                     <li class="feedback-item">
-                        <div class="feedback-content">{{ fb.content }}</div>
+                        <div class="feedback-content">{{ fb.reason}}</div>
                         <div class="feedback-user">
                             {{ fb.user.username }}<br>
                             <small>{{ fb.created_at|date:"Y-m-d H:i" }}</small>
