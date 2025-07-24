@@ -383,9 +383,6 @@ def submit_answer_api(request):
     return Response({'success': True, 'is_correct': session.is_correct ,
                      'selected_option_id': option.id,})
 
-
-
-
 def audience_after_view(request, presentation_id, user_id):
     # 获取演讲对象
     presentation = get_object_or_404(Presentation, id=presentation_id)

@@ -27,6 +27,7 @@ def get_comments(request, quiz_id):
         except Discussion.DoesNotExist:
             return JsonResponse({'code': 1, 'msg': '该题目没有讨论区'}, status=404)
 
+
 @csrf_exempt
 def post_comment(request, quiz_id):
     if request.method == 'POST':
@@ -34,15 +35,36 @@ def post_comment(request, quiz_id):
             data = json.loads(request.body)
             user_id = data.get('user_id')
             content = data.get('content')
+
             user = User.objects.get(id=user_id)
-            discussion = Discussion.objects.get(quiz_id=quiz_id)
+            quiz = Quiz.objects.get(id=quiz_id)
+
+            # 尝试获取已有讨论区，没有就创建
+            discussion, created = Discussion.objects.get_or_create(
+                quiz=quiz,
+                defaults={
+                    'open_time': timezone.now(),
+                    'close_time': timezone.now() + timezone.timedelta(days=7),  # 举例7天后关闭
+                }
+            )
+
             now = timezone.now()
             if not (discussion.open_time <= now <= discussion.close_time):
                 return JsonResponse({'code': 1, 'msg': '讨论已关闭'}, status=403)
 
-            Comment.objects.create(discussion=discussion, user=user, content=content)
+            Comment.objects.create(
+                discussion=discussion,
+                user=user,
+                content=content
+            )
+
             return JsonResponse({'code': 0, 'msg': '评论成功'})
-        except (User.DoesNotExist, Discussion.DoesNotExist):
-            return JsonResponse({'code': 1, 'msg': '用户或讨论区不存在'}, status=404)
+
+        except User.DoesNotExist:
+            return JsonResponse({'code': 1, 'msg': '用户不存在'}, status=404)
+        except Quiz.DoesNotExist:
+            return JsonResponse({'code': 1, 'msg': '题目不存在'}, status=404)
         except Exception as e:
             return JsonResponse({'code': 1, 'msg': str(e)}, status=500)
+    else:
+        return JsonResponse({'code': 1, 'msg': '请求方法错误'}, status=405)
