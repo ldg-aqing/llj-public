@@ -23,16 +23,20 @@
     </video>
 
 
-     <!-- 🚨 登录失败提示信息 -->
+     <!--  登录失败提示信息 -->
     {% if messages %}
-        <ul class="error-messages">
+        <script>
             {% for message in messages %}
-                <li style="color:red;">{{ message }}</li>
+                alert("{{ message|escapejs }}");
             {% endfor %}
-        </ul>
+            // 手动跳转回来
+            window.location.href = "{% url 'login' %}";
+        </script>
     {% endif %}
 
+
 <head>
+
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -93,7 +97,7 @@
 
 
         <!-- 登录盒子 -->
-        <div class="login-form"action="{% url 'login' %}">
+        <form class="login-form" method="post" action="{% url 'login' %}">
             <!-- 标题盒子 -->
             <div class="title-box">
                 <h1>登录</h1>

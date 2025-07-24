@@ -297,6 +297,12 @@ body {
     font-weight: 500;
 }
 
+.myanswer-text{
+     color: #157df8;
+    font-weight: 500;
+}
+
+
 .question-explanation {
     padding: 16px;
     font-size: 1rem;

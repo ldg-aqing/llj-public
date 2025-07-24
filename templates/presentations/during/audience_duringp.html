@@ -53,7 +53,7 @@
     </div>
     </div>
     </div>
-
+<script src="{% static 'js/common-polling.js' %}"></script>
     <script>
 
 // 获取CSRF Token的通用方法
@@ -82,7 +82,8 @@ let currentQuestionIndex = 0;
 let questions = [];
 
 document.addEventListener('DOMContentLoaded', function () {
-    fetch(`/presentations/api/presentations/audience_detail/${presentationId}/`)
+    fetch(`/presentations/api/presentations/audience_detail/${presentationId}/?user_id=${user_id}`)
+
         .then(res => res.json())
         .then(data => {
             pageData = data;
@@ -90,6 +91,27 @@ document.addEventListener('DOMContentLoaded', function () {
             loadFeedbacks();
             loadQuestions();
             bindEvents();
+            setInterval(() => {
+            fetch(`/presentations/api/presentations/audience_detail/${presentationId}/?user_id=${user_id}`)
+                .then(res => res.json())
+                .then(data => {
+                    const oldStatuses = questions.map(q => q.status);
+                    const newStatuses = data.questions.map(q => q.status);
+
+                    // 如果题目状态发生变化，刷新渲染
+                    const hasChanged = newStatuses.some((status, i) => status !== oldStatuses[i]);
+                    if (hasChanged) {
+                        pageData = data;
+                        loadQuestions();
+                        showQuestion(currentQuestionIndex);
+                    }
+                     pageData.feedbacks = data.feedbacks;
+                     loadFeedbacks();
+                })
+                .catch(() => {
+                    console.warn('轮询失败');
+                });
+        }, 5000);  // 每 5 秒检测一次
         })
         .catch(() => {
             document.getElementById('presentationTitle').textContent = "加载失败";
@@ -123,9 +145,8 @@ function loadFeedbacks() {
 }
 
 function loadQuestions() {
-    console.log("loadQuestions called", pageData.questions);
     const container = document.getElementById('questionList');
-    questions = (pageData.questions || []);
+    questions = pageData.questions || [];
 
     if (!questions.length) {
         container.innerHTML = '<div class="empty-tip">暂无题目</div>';
@@ -134,10 +155,8 @@ function loadQuestions() {
         return;
     }
 
-    // 清空容器
-    container.innerHTML = '';
+    container.innerHTML = ''; // 清空
 
-    // 为每个问题创建容器
     questions.forEach((question, index) => {
         const statusClass = `status-${question.status}`;
         const statusText = {
@@ -145,35 +164,39 @@ function loadQuestions() {
             'completed': '已结束'
         }[question.status] || question.status;
 
+        const selectedOptionId = question.user_answer ? question.user_answer.option_id : null;
+
         let optionsHtml = '';
-        (question.options || []).forEach((option, index) => {
-            const optionId = option.id;
-            optionsHtml += `<li class="question-option">
-                <input type="radio" id="question-${question.id}-option-${index}" name="question-${question.id}" value="${optionId}" data-option-id="${optionId}" class="option-radio" />
-                <label for="question-${question.id}-option-${index}">${option.text}</label>
-            </li>`;
+        (question.options || []).forEach((option, i) => {
+            const checked = option.id === selectedOptionId ? 'checked' : '';
+            const disabled = question.status === 'completed' ? 'disabled' : '';
+            optionsHtml += `
+                <li class="question-option">
+                    <input type="radio" id="question-${question.id}-option-${i}" name="question-${question.id}" value="${option.id}" data-option-id="${option.id}" class="option-radio" ${checked} ${disabled} />
+                    <label for="question-${question.id}-option-${i}">${option.text}</label>
+                </li>`;
         });
+
+        const myAnswerSection = question.user_answer
+            ? `<div class="my-answer" id="my-answer-${question.id}" style="display:block;">我的答案: ${question.user_answer.option_text}</div>`
+            : '';
 
         let answerSection = '';
         let explanationSection = '';
         let actionsHtml = '';
 
         if (question.status === 'completed') {
-            answerSection = `<div class="question-answer" style="display: block;">
-                <span class="answer-label">参考答案:</span>
-                <span class="answer-text">${question.answer}</span>
-            </div>
-            <div class="question-explanation" style="display: block;">
-                <span class="explanation-label">解析:</span>
-                <span>${question.explanation}</span>
-            </div>`;
-        } else if (question.status === 'active') {
-            actionsHtml = `<div class="question-actions">
-                <button class="action-btn submit-answer-btn" data-question-id="${question.id}">提交答案</button>
-            </div>`;
+            answerSection = `<div class="question-answer" style="display: block;"><span class="answer-label">参考答案:</span> ${question.answer}</div>`;
+            explanationSection = `<div class="question-explanation" style="display: block;"><span class="explanation-label">解析:</span> ${question.explanation}</div>`;
         }
 
-        const questionHtml = `
+
+        if (question.status === 'active' && !question.user_answer) {
+            actionsHtml = `<div class="question-actions"><button class="action-btn submit-answer-btn" data-question-id="${question.id}">提交答案</button></div>`;
+        }
+
+
+        const html = `
         <div class="single-question-container" data-question-index="${index}" data-question-id="${question.id}">
             <div class="question-box">
                 <div class="question-header">
@@ -184,32 +207,27 @@ function loadQuestions() {
                     <div class="question-text">${question.content}</div>
                     <ul class="question-options">${optionsHtml}</ul>
                 </div>
+                ${myAnswerSection}
                 ${answerSection}
                 ${explanationSection}
                 ${actionsHtml}
-                <!-- 讨论区 -->
-<div class="discussion-area" id="discussion-area-${question.id}">
-    <h3 style="margin-bottom:8px;">讨论区</h3>
-    <ul class="discussion-list" id="discussion-list-${question.id}">
-        <li class="empty-tip">加载中...</li>
-    </ul>
-    <div class="discussion-form">
-        <input type="text" id="discussion-input-${question.id}" class="discussion-input" placeholder="请输入评论..." />
-        <button class="submit-btn" onclick="submitComment(${question.id})">提交评论</button>
-    </div>
-</div>
+                <div class="discussion-area" id="discussion-area-${question.id}">
+                    <h3 style="margin-bottom:8px;">讨论区</h3>
+                    <ul class="discussion-list" id="discussion-list-${question.id}"><li class="empty-tip">加载中...</li></ul>
+                    <div class="discussion-form">
+                        <input type="text" id="discussion-input-${question.id}" class="discussion-input" placeholder="请输入评论..." />
+                        <button class="submit-btn" onclick="submitComment(${question.id})">提交评论</button>
+                    </div>
+                </div>
             </div>
         </div>`;
-
-        container.insertAdjacentHTML('beforeend', questionHtml);
+        container.insertAdjacentHTML('beforeend', html);
     });
 
-    // 更新导航状态
     updateQuestionNavigation();
-
-    // 显示第一题
     showQuestion(0);
 }
+
 
 function showQuestion(index) {
     currentQuestionIndex = index;
@@ -391,19 +409,45 @@ function submitAnswer(questionId) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            alert('提交成功');
+    alert('提交成功');
+    // 🔁 重新请求完整数据，刷新 questions
+        fetch(`/presentations/api/presentations/audience_detail/${presentationId}/?user_id=${user_id}`)
+            .then(res => res.json())
+            .then(data => {
+                // 更新全局数据
+                pageData = data;
+                questions = pageData.questions; // 👈 加这一句，保持全局一致
+                loadQuestions();
+                showQuestion(currentQuestionIndex);  // 保持题目不跳动
 
-            // 禁用按钮
-            let btn = document.querySelector(`.submit-answer-btn[data-question-id="${questionId}"]`);
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = '已提交';
-                btn.classList.add('submit-answer-btn-disabled');
-            }
+            })
+            .catch(() => {
+                alert('刷新题目失败，请稍后重试');
+            });
 
-            // 找对应的 label，显示"我的答案"
-            const selectedLabel = selectedInputId ? document.querySelector(`label[for="${selectedInputId}"]`) : null;
-            const answerText = selectedLabel ? selectedLabel.textContent : `选项ID:${optionId}`;
+    // 更新 questions 中的 user_answer，避免刷新才能显示
+    const q = questions.find(q => q.id === questionId);
+    if (q) {
+        const selectedLabel = selectedInputId ? document.querySelector(`label[for="${selectedInputId}"]`) : null;
+        const answerText = selectedLabel ? selectedLabel.textContent : `选项ID:${optionId}`;
+
+        q.user_answer = {
+            option_id: parseInt(optionId),
+            option_text: answerText
+        };
+    }
+
+    // 禁用按钮
+    let btn = document.querySelector(`.submit-answer-btn[data-question-id="${questionId}"]`);
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '已提交';
+        btn.classList.add('submit-answer-btn-disabled');
+    }
+
+    // 找对应的 label，显示"我的答案"
+    const selectedLabel = selectedInputId ? document.querySelector(`label[for="${selectedInputId}"]`) : null;
+    const answerText = selectedLabel ? selectedLabel.textContent : `选项ID:${optionId}`;
 
     let myAnswerDiv = document.querySelector(`#my-answer-${questionId}`);
     if (!myAnswerDiv) {
@@ -419,7 +463,8 @@ function submitAnswer(questionId) {
     }
 
 
-        } else {
+    }
+     else   {
             alert(data.error || '提交失败');
         }
     })
@@ -427,6 +472,7 @@ function submitAnswer(questionId) {
         alert('提交失败，网络错误');
     });
 }
+
 
     </script>
 </body>

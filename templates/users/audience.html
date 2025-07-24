@@ -48,26 +48,8 @@
 
         <!-- 演讲列表区 -->
         <div class="presentation-list-container">
-            <div class="presentation-list">
-                {% for presentation in presentations %}
-                    <div class="presentation-item">
-                        <div class="presentation-details">
-                            <div class="presentation-name">{{ presentation.title }}</div>
-                            <div class="presentation-status">状态：{{ presentation.get_status_display }}</div>
-                        </div>
-
-                        {% if presentation.status == 'LIVE' %}
-          <button class="enter-btn" type="button"
-            onclick="window.location.href='/presentations/audience_during_presentation/{{ presentation.id }}?user_id={{ user.id }}'">
-                 进入演讲
-          </button>
-                        {% elif presentation.status == 'FINISHED' %}
-                     <a href="{% url 'audience_after' presentation.id user.id %}" class="enter-btn">查看报告</a>
-                        {% else %}
-                            <button class="enter-btn" disabled>待开始</button>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+            <div class="presentation-list" id="presentationList">
+                <div class="empty-tip">加载中...</div>
             </div>
         </div>
     </div>
@@ -86,5 +68,58 @@
         setTimeout(() => {
             popup.classList.add('hide');
         }, 2000); // 显示持续时间
+    });
+
+    // 动态加载演讲列表
+    function loadAudiencePresentations() {
+        fetch('/presentations/api/presentations/audience_list/')
+            .then(res => res.json())
+            .then(data => {
+                const userId = data.user_id;
+                const container = document.getElementById('presentationList');
+
+                if (data.code !== 0 || !data.presentations) {
+                    container.innerHTML = '<div class="empty-tip">加载失败</div>';
+                    return;
+                }
+
+                const presentations = data.presentations;
+                if (!presentations.length) {
+                    container.innerHTML = '<div class="empty-tip">暂无演讲</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                presentations.forEach(p => {
+                    let btn = '';
+                    if (p.status === 'LIVE') {
+                        btn = `<button class="enter-btn" onclick="window.location.href='/presentations/audience_during_presentation/${p.id}?user_id=${userId}'">进入演讲</button>`;
+                    } else if (p.status === 'FINISHED') {
+                        btn = `<a href="/presentations/after/audience_after/${p.id}/${userId}/" class="enter-btn">查看报告</a>`;
+                    } else {
+                        btn = `<button class="enter-btn" disabled>待开始</button>`;
+                    }
+
+                    const html = `
+                        <div class="presentation-item">
+                            <div class="presentation-details">
+                                <div class="presentation-name">${p.title}</div>
+                                <div class="presentation-status">状态：${p.status_display}</div>
+                            </div>
+                            ${btn}
+                        </div>`;
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+            })
+            .catch(() => {
+                const container = document.getElementById('presentationList');
+                container.innerHTML = '<div class="empty-tip">加载失败</div>';
+            });
+    }
+
+    // 初始化加载和轮询
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAudiencePresentations();
+        setInterval(loadAudiencePresentations, 10000);
     });
 </script>
