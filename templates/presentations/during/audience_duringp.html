@@ -53,7 +53,7 @@
     </div>
     </div>
     </div>
-
+<script src="{% static 'js/common-polling.js' %}"></script>
     <script>
 
 // 获取CSRF Token的通用方法
@@ -105,11 +105,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         loadQuestions();
                         showQuestion(currentQuestionIndex);
                     }
+                     pageData.feedbacks = data.feedbacks;
+                     loadFeedbacks();
                 })
                 .catch(() => {
                     console.warn('轮询失败');
                 });
-        }, 15000);  // 每 15 秒检测一次
+        }, 5000);  // 每 5 秒检测一次
         })
         .catch(() => {
             document.getElementById('presentationTitle').textContent = "加载失败";
