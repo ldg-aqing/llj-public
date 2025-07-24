@@ -256,6 +256,14 @@ def audience_during_presentation(request, presentation_id):
 
 @api_view(['GET'])
 def audience_presentation_detail(request, presentation_id):
+    user_id = request.GET.get('user_id')  #  从前端 URL 参数获取
+    user = None
+    if user_id:
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            user = None
+
     try:
         presentation = Presentation.objects.get(id=presentation_id)
         quizzes = Quiz.objects.filter(presentation_id=presentation_id, status__in=['active', 'completed']).annotate(
@@ -278,6 +286,39 @@ def audience_presentation_detail(request, presentation_id):
             except Exception:
                 return ""
 
+        question_list = []
+        for q in quizzes:
+            user_answer = None
+
+            if user:
+                session = QuizSession.objects.filter(quiz=q, user=user).first()
+                if session and session.selected_option:
+                    options = list(q.options.all())
+                    try:
+                        idx = options.index(session.selected_option)
+                        label = chr(65 + idx)
+                    except:
+                        label = ''
+                    user_answer = {
+                        "option_id": session.selected_option.id,
+                        "option_text": f"{label}. {session.selected_option.option_text}"
+                    }
+
+            question_list.append({
+                "id": q.id,
+                "title": f"题目 #{q.id}",
+                "status": q.status,
+                "content": q.question,
+                "options": [
+                    {"id": opt.id, "text": f"{chr(65 + i)}. {opt.option_text}"}
+                    for i, opt in enumerate(q.options.all())
+                ],
+                "answer": f"{get_correct_option_label(q)}. {q.correct_option.option_text}" if q.correct_option else "",
+                "explanation": q.explanation or "",
+                "discussions": [],
+                "user_answer": user_answer  # ✅ 用于前端显示“我的答案”
+            })
+
         data = {
             "presentation": {
                 "id": presentation.id,
@@ -297,23 +338,7 @@ def audience_presentation_detail(request, presentation_id):
                 }
                 for fb in feedbacks
             ],
-            "questions": [
-                {
-                    "id": q.id,
-                    "title": f"题目 #{q.id}",
-                    "status": q.status,
-                    "content": q.question,
-                    "options": [
-                        {"id": opt.id, "text": f"{chr(65 + i)}. {opt.option_text}"}
-                        for i, opt in enumerate(q.options.all())
-                    ],
-                    "answer": f"{get_correct_option_label(q)}. {q.correct_option.option_text}" if q.correct_option else "",
-                    "explanation": q.explanation or "",
-                    "discussions": [],
-                    "myAnswer": None
-                }
-                for q in quizzes
-            ]
+            "questions": question_list
         }
         return Response(data)
     except Presentation.DoesNotExist:
