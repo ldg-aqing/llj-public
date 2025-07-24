@@ -691,3 +691,43 @@ body {
         height: 16px;
     }
 }
+
+
+/* 添加到audience_duringp.css中 */
+.correct-option {
+    background: rgba(52, 168, 83, 0.1);
+    border-left: 3px solid #34a853;
+}
+
+.user-answer {
+    background: rgba(74, 107, 255, 0.1);
+}
+
+.user-incorrect {
+    background: rgba(234, 67, 53, 0.1);
+    border-left: 3px solid #ea4335;
+}
+
+
+.comment-form {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.comment-input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 1px solid rgba(74, 107, 255, 0.2);
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.comment-input:focus {
+    border-color: #4A6BFF;
+    box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.1);
+}
+

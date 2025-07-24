@@ -283,7 +283,6 @@ function submitComment(quizId) {
     .then(res => res.json())
     .then(data => {
         if (data.code === 0) {
-             alert('评论提交成功');
             input.value = '';
             loadCommentsForQuestion(quizId);
         } else {
@@ -406,16 +405,19 @@ function submitAnswer(questionId) {
             const selectedLabel = selectedInputId ? document.querySelector(`label[for="${selectedInputId}"]`) : null;
             const answerText = selectedLabel ? selectedLabel.textContent : `选项ID:${optionId}`;
 
-            let myAnswerDiv = document.querySelector(`#my-answer-${questionId}`);
-            if (!myAnswerDiv) {
-                const questionBox = document.querySelector(`.question-box[data-question-id="${questionId}"]`);
-                myAnswerDiv = document.createElement('div');
-                myAnswerDiv.id = `my-answer-${questionId}`;
-                myAnswerDiv.className = 'my-answer';
-                questionBox.appendChild(myAnswerDiv);
-            }
-            myAnswerDiv.textContent = '我的答案: ' + answerText;
-            myAnswerDiv.style.display = 'block';
+    let myAnswerDiv = document.querySelector(`#my-answer-${questionId}`);
+    if (!myAnswerDiv) {
+        const questionContainer = document.querySelector(`.single-question-container[data-question-id="${questionId}"]`);
+        const questionBox = questionContainer ? questionContainer.querySelector('.question-box') : null;
+
+        if (questionBox) {
+            myAnswerDiv = document.createElement('div');
+            myAnswerDiv.id = `my-answer-${questionId}`;
+            myAnswerDiv.className = 'my-answer';
+            questionBox.appendChild(myAnswerDiv);
+        }
+    }
+
 
         } else {
             alert(data.error || '提交失败');
