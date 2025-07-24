@@ -53,7 +53,7 @@
     </div>
     </div>
     </div>
-
+<script src="{% static 'js/common-polling.js' %}"></script>
     <script>
 
 // 获取CSRF Token的通用方法
@@ -105,6 +105,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         loadQuestions();
                         showQuestion(currentQuestionIndex);
                     }
+                     pageData.feedbacks = data.feedbacks;
+                     loadFeedbacks();
                 })
                 .catch(() => {
                     console.warn('轮询失败');
