@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from presentations.models import Presentation, PresentationAttendee
 from material.forms import UploadForm
 from uploads.models import Upload
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from quizzes.models import Quiz, QuizOption, QuizSession
@@ -34,6 +34,24 @@ def speaker_home(request):
         'user': user,
         'presentations': presentations,
     })
+
+def speaker_presentation_list(request):
+    user_id = request.session.get('user_id')
+    user = User.objects.filter(id=user_id, role='SPEAKER').first()
+    if not user:
+        return JsonResponse({'code': 1, 'msg': '无效用户'}, status=403)
+
+    presentations = Presentation.objects.filter(speaker=user)
+    data = [
+        {
+            'id': p.id,
+            'title': p.title,
+            'status': p.status,
+            'status_display': p.get_status_display()
+        } for p in presentations
+    ]
+    return JsonResponse({'code': 0, 'presentations': data, 'user_id': user.id})
+
 
 def organizer_home(request):
     user_id = request.session.get('user_id')
@@ -70,6 +88,26 @@ def organizer_home(request):
         'speakers': speakers
     })
 
+@require_GET
+def organizer_presentation_list_api(request):
+    user_id = request.session.get('user_id')
+    try:
+        user = User.objects.get(id=user_id, role='ORGANIZER')
+    except User.DoesNotExist:
+        return JsonResponse({'code': 1, 'msg': '用户不存在'}, status=403)
+
+    presentations = Presentation.objects.filter(organizer=user).order_by('-id')
+
+    data = []
+    for p in presentations:
+        data.append({
+            'id': p.id,
+            'title': p.title,
+            'status': p.status,
+            'status_display': p.get_status_display(),
+        })
+
+    return JsonResponse({'code': 0, 'presentations': data})
 def audience_home(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -90,6 +128,25 @@ def audience_home(request):
         'presentations': presentations,
     })
 
+def audience_presentation_list(request):
+    user_id = request.session.get('user_id')
+    user = User.objects.filter(id=user_id, role='AUDIENCE').first()
+    if not user:
+        return JsonResponse({'code': 1, 'msg': '无效用户'}, status=403)
+
+    from presentations.models import PresentationAttendee
+    entries = PresentationAttendee.objects.filter(attendee=user)
+    presentations = [e.presentation for e in entries]
+
+    data = [
+        {
+            'id': p.id,
+            'title': p.title,
+            'status': p.status,
+            'status_display': p.get_status_display()
+        } for p in presentations
+    ]
+    return JsonResponse({'code': 0, 'presentations': data, 'user_id': user_id})
 
 def start_presentation(request, pk):
     presentation = get_object_or_404(Presentation, pk=pk)

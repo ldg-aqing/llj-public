@@ -45,24 +45,8 @@
 
         <!-- 演讲列表区 -->
         <div class="presentation-list-container">
-            <div class="presentation-list">
-                {% for presentation in presentations %}
-                    <div class="presentation-item">
-                        <div class="presentation-details">
-                            <div class="presentation-name">{{ presentation.title }}</div>
-                            <div class="presentation-status">状态：{{ presentation.get_status_display }}</div>
-                        </div>
-
-                        {% if presentation.status == 'PENDING' %}
-                            <button class="enter-btn" type="button" onclick="window.location.href='{% url 'upload_material' presentation.speaker.id presentation.id %}'">上传资料</button>
-                        {% elif presentation.status == 'LIVE' %}
-                            <button class="enter-btn" disabled>进行中</button>
-                        {% elif presentation.status == 'FINISHED' %}
-                       <!-- 假设你在详情页或者其它页面 -->
-                            <button class="enter-btn" onclick="window.location.href='{% url 'show_feedbacks' presentation.id %}'">查看报告</button>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+            <div class="presentation-list" id="presentationList">
+                <div class="empty-tip">加载中...</div>
             </div>
         </div>
     </div>
@@ -82,4 +66,50 @@
 
   }, 2000); // 显示持续时间
 })
+    function loadSpeakerPresentations() {
+    fetch('/presentations/api/presentations/speaker_list/')
+        .then(res => res.json())
+        .then(data => {
+            const userId = data.user_id;
+            const container = document.getElementById('presentationList');
+            if (data.code !== 0 || !data.presentations) {
+                container.innerHTML = '<div class="empty-tip">加载失败</div>';
+                return;
+            }
+
+            const presentations = data.presentations;
+            if (!presentations.length) {
+                container.innerHTML = '<div class="empty-tip">暂无演讲</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            presentations.forEach(p => {
+                let btn = '';
+                if (p.status === 'PENDING') {
+                    btn = `<button class="enter-btn" onclick="window.location.href='/material/upload/${userId}/${p.id}/'">上传资料</button>`;
+                } else if (p.status === 'LIVE') {
+                    btn = `<button class="enter-btn" disabled>进行中</button>`;
+                } else if (p.status === 'FINISHED') {
+                    btn = `<button class="enter-btn" onclick="window.location.href='/api/feedbacks/report/speaker/${p.id}/'">查看报告</button>`;
+                }
+
+                const html = `
+                    <div class="presentation-item">
+                        <div class="presentation-details">
+                            <div class="presentation-name">${p.title}</div>
+                            <div class="presentation-status">状态：${p.status_display}</div>
+                        </div>
+                        ${btn}
+                    </div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        });
+}
+
+// 初始化加载 + 轮询
+document.addEventListener('DOMContentLoaded', () => {
+    loadSpeakerPresentations();
+    setInterval(loadSpeakerPresentations, 10000);
+});
     </script>
