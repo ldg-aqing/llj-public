@@ -13,13 +13,30 @@ def material_list(request):
     return render(request, 'material_list.html', {'materials': materials})
 
 def upload_material(request, speaker_id, presentation_id):
-    if request.method == 'POST':
+    from .models import UploadedMaterial
+    from django.views.decorators.csrf import csrf_exempt
+
+    # 处理删除请求
+    if request.method == 'POST' and 'delete_id' in request.POST:
+        delete_id = request.POST.get('delete_id')
+        try:
+            material = UploadedMaterial.objects.get(id=delete_id)
+            if material.file:
+                file_path = material.file.path
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            material.delete()
+        except UploadedMaterial.DoesNotExist:
+            pass
+        return redirect('upload_material', speaker_id=speaker_id, presentation_id=presentation_id)
+
+    # 处理上传请求
+    if request.method == 'POST' and 'file' in request.FILES:
         file = request.FILES.get('file')
-        file_type = request.POST.get('file_type')
+        file_type = request.POST.get('file_type', '').lower()
         speaker_id = int(request.POST.get('speaker_id'))
         presentation_id = int(request.POST.get('presentation_id'))
 
-        # ✅ 临时保存文件以供提取
         temp_dir = 'media/temp'
         os.makedirs(temp_dir, exist_ok=True)
         temp_path = os.path.join(temp_dir, file.name)
@@ -28,10 +45,8 @@ def upload_material(request, speaker_id, presentation_id):
             for chunk in file.chunks():
                 destination.write(chunk)
 
-        # ✅ 提取文本内容
         extracted_text = extract_text_from_file(temp_path, file_type)
 
-        # ✅ 写入 Upload 模型（包含提取内容）
         Upload.objects.create(
             user_id=speaker_id,
             presentation_id=presentation_id,
@@ -40,7 +55,6 @@ def upload_material(request, speaker_id, presentation_id):
             content=extracted_text
         )
 
-        # ✅ 可选写入 UploadedMaterial（用于 material_list）
         UploadedMaterial.objects.create(
             title=file.name,
             file=file,
@@ -48,21 +62,14 @@ def upload_material(request, speaker_id, presentation_id):
             extracted_text=extracted_text
         )
 
-        # ✅ 删除临时文件
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
-        return render(request, 'upload.html', {
-            'form': UploadForm(),
-            'speaker_id': speaker_id,
-            'presentation_id': presentation_id,
-            'success': '上传成功并提取完毕！'
-        })
-
-    else:
-        form = UploadForm()
+    # 获取当前上传内容列表
+    materials = UploadedMaterial.objects.all()
     return render(request, 'upload.html', {
-        'form': form,
+        'form': UploadForm(),
         'speaker_id': speaker_id,
         'presentation_id': presentation_id,
+        'materials': materials,
     })
