@@ -45,10 +45,6 @@
                 {% if speaker and speaker.username %}
                     <div class="list-item">
                         <span class="item-name">{{ speaker.username }}</span>
-                        <div>
-                            <a href="#" class="action-btn view-btn">查看</a>
-                            <a href="#" class="action-btn delete-btn">移除</a>
-                        </div>
                     </div>
                 {% else %}
                     <div class="empty-tip">暂无演讲者</div>
@@ -60,10 +56,6 @@
         <div class="list-section">
             <div class="list-header">
                 <h2 class="list-title">演讲文件</h2>
-                <button class="add-btn" type="button"
-                        onclick="window.location.href='/presentations/upload/{{ presentation.id }}/'">
-                    <span>上传文件</span>
-                </button>
             </div>
             <div id="fileList">
                 {% if uploads|length > 0 %}
@@ -76,7 +68,6 @@
                             </div>
                             <div>
                                 <a href="/media/materials/{{ file.file_path }}" target="_blank" class="action-btn view-btn">查看</a>
-                                <a href="#" class="action-btn delete-btn">删除</a>
                             </div>
                         </div>
                     {% endfor %}
@@ -100,11 +91,8 @@
                     {% for user in attendees %}
                         <div class="list-item">
                             <span class="item-name">{{ user.username }}</span>
-                            <div>
-                                <a href="#" class="action-btn view-btn">查看</a>
-                                <a href="#" class="action-btn delete-btn">移除</a>
-                            </div>
                         </div>
+
                     {% endfor %}
                 {% else %}
                     <div class="empty-tip">暂无听众</div>

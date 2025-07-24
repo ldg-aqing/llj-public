@@ -1,0 +1,362 @@
+
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans SC', 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding: 40px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(74, 107, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+       /* ==================== 演讲信息区域 ==================== */
+.presentation-info {
+    padding: 80px 30px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 16px 16px 0 0;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: 0 8px 32px rgba(74, 107, 255, 0.15);
+}
+
+.presentation-info::before {
+    content: "";
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    right: -20%;
+    bottom: -20%;
+    background: linear-gradient(
+        135deg,
+        rgba(74, 107, 255, 0.3) 0%,
+        rgba(255, 158, 196, 0.25) 50%,
+        rgba(74, 107, 255, 0.3) 100%
+    );
+    z-index: -1;
+    animation: shimmer 8s infinite linear;
+    background-size: 200% 200%;
+    filter: blur(8px);
+}
+
+.presentation-info::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 100%;
+    height: 200%;
+    background: radial-gradient(
+        circle closest-side,
+        rgba(74, 107, 255, 0.35) 0%,
+        transparent 70%
+    );
+    z-index: -2;
+    animation: rotate 15s linear infinite;
+}
+
+.presentation-title {
+    font-family: 'Montserrat', 'Noto Sans SC', sans-serif;
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 30px;
+    letter-spacing: -1.2px;
+    line-height: 1.1;
+    position: relative;
+    text-transform: uppercase;
+    background: linear-gradient(90deg,
+        #4A6BFF 0%,
+        #8A2BE2 30%,
+        #FF1493 70%,
+        #FF9EC4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    padding: 5px 0;
+    -webkit-text-stroke: 0.5px rgba(255,255,255,0.3);
+}
+
+.presentation-meta {
+    display: flex;
+    gap: 25px;
+    font-size: 1.2rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 12px 22px;
+    border-radius: 50px;
+    backdrop-filter: blur(6px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    color: #555;
+}
+
+.meta-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(74, 107, 255, 0.15);
+}
+
+.meta-label {
+    font-weight: 600;
+    margin-right: 10px;
+    color: #4A6BFF;
+}
+@keyframes shimmer {
+    0% {
+        background-position: 0% 0%;
+        opacity: 0.8;
+    }
+    50% {
+        background-position: 100% 100%;
+        opacity: 1;
+    }
+    100% {
+        background-position: 0% 0%;
+        opacity: 0.8;
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+        opacity: 0.9;
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+        opacity: 0.7;
+    }
+}
+
+        /* 返回按钮 */
+        .add-btn {
+            background: linear-gradient(135deg, #4A6BFF 0%, #4285F4 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(74, 107, 255, 0.3);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 20px 0;
+        }
+
+        .add-btn:hover {
+            background: linear-gradient(135deg, #3A5BEF 0%, #3367D6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 107, 255, 0.4);
+        }
+
+        /* 听众列表区域 */
+        .audience-list {
+            padding: 0;
+        }
+
+        .list-header {
+            padding: 20px 30px;
+            font-size: 1.2rem;
+            color: #666;
+            border-bottom: 1px solid rgba(234, 234, 234, 0.7);
+            background-color: #fafafa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 30px;
+            border-bottom: 1px solid rgba(234, 234, 234, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:hover {
+            background-color: rgba(74, 107, 255, 0.05);
+        }
+
+        .audience-name {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .invite-btn {
+            background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+            color: white;
+            box-shadow: 0 2px 6px rgba(52, 168, 83, 0.3);
+        }
+
+        .invite-btn:hover {
+            background: linear-gradient(135deg, #2d8e47 0%, #247e3d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 168, 83, 0.4);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #ea4335 0%, #d33426 100%);
+            color: white;
+            box-shadow: 0 2px 6px rgba(234, 67, 53, 0.3);
+        }
+
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #d33426 0%, #c12416 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(234, 67, 53, 0.4);
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: #999;
+            padding: 40px 0;
+            font-size: 1rem;
+            font-style: italic;
+        }
+
+        /* 动画 */
+        @keyframes shimmer {
+            0% {
+                background-position: 0% 0%;
+                opacity: 0.8;
+            }
+            50% {
+                background-position: 100% 100%;
+                opacity: 1;
+            }
+            100% {
+                background-position: 0% 0%;
+                opacity: 0.8;
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            .container {
+                border-radius: 12px;
+            }
+
+            .presentation-info {
+                padding: 20px;
+            }
+
+            .presentation-title {
+                font-size: 1.5rem;
+            }
+
+            .list-header, .list-item {
+                padding: 15px 20px;
+            }
+
+            .action-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+                min-width: 70px;
+            }
+        }
+
+/* ==================== 方形主页按钮 ==================== */
+.home-button {
+    position: absolute;
+    left: 25px;
+    top: 15%;
+    transform: translateY(-50%);
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0.93) 100%);
+    border: none;
+    color: #4A6BFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(74, 107, 255, 0.3);
+    transition: all 0.3s ease;
+    z-index: 10;
+    font-family: 'Noto Sans SC', sans-serif;
+}
+
+.home-button:hover {
+    transform: translateY(-50%) translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 107, 255, 0.4);
+}
+
+.home-button:active {
+    transform: translateY(-50%) scale(1.3);
+}
+
+.home-button svg {
+    flex-shrink: 0;
+}
+/* ==================== 当前演讲者标签 ==================== */
+.current-speaker {
+    font-size: 0.9rem;
+    color: #4A6BFF;
+    font-weight: 500;
+    padding: 4px 10px;
+    background-color: rgba(74, 107, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* ==================== 更换按钮 ==================== */
+.change-btn {
+    background: linear-gradient(135deg, #4A6BFF 0%, #4285F4 100%);
+    color: white;
+    box-shadow: 0 2px 6px rgba(74, 107, 255, 0.3);
+}
+
+.change-btn:hover {
+    background: linear-gradient(135deg, #3A5BEF 0%, #3367D6 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(74, 107, 255, 0.4);
+}
