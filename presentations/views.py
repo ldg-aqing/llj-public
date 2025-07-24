@@ -15,6 +15,7 @@ from django.db.models import Case, When, Value, IntegerField
 from django.views.decorators.csrf import csrf_exempt
 from feedback.models import Feedback
 from discussions.models import Discussion, Comment
+from django.db.models import Count
 def speaker_home(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -257,6 +258,14 @@ def audience_during_presentation(request, presentation_id):
 
 @api_view(['GET'])
 def audience_presentation_detail(request, presentation_id):
+    user_id = request.GET.get('user_id')  #  从前端 URL 参数获取
+    user = None
+    if user_id:
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            user = None
+
     try:
         presentation = Presentation.objects.get(id=presentation_id)
         quizzes = Quiz.objects.filter(presentation_id=presentation_id, status__in=['active', 'completed']).annotate(
@@ -279,6 +288,39 @@ def audience_presentation_detail(request, presentation_id):
             except Exception:
                 return ""
 
+        question_list = []
+        for q in quizzes:
+            user_answer = None
+
+            if user:
+                session = QuizSession.objects.filter(quiz=q, user=user).first()
+                if session and session.selected_option:
+                    options = list(q.options.all())
+                    try:
+                        idx = options.index(session.selected_option)
+                        label = chr(65 + idx)
+                    except:
+                        label = ''
+                    user_answer = {
+                        "option_id": session.selected_option.id,
+                        "option_text": f"{label}. {session.selected_option.option_text}"
+                    }
+
+            question_list.append({
+                "id": q.id,
+                "title": f"题目 #{q.id}",
+                "status": q.status,
+                "content": q.question,
+                "options": [
+                    {"id": opt.id, "text": f"{chr(65 + i)}. {opt.option_text}"}
+                    for i, opt in enumerate(q.options.all())
+                ],
+                "answer": f"{get_correct_option_label(q)}. {q.correct_option.option_text}" if q.correct_option else "",
+                "explanation": q.explanation or "",
+                "discussions": [],
+                "user_answer": user_answer  # ✅ 用于前端显示“我的答案”
+            })
+
         data = {
             "presentation": {
                 "id": presentation.id,
@@ -298,23 +340,7 @@ def audience_presentation_detail(request, presentation_id):
                 }
                 for fb in feedbacks
             ],
-            "questions": [
-                {
-                    "id": q.id,
-                    "title": f"题目 #{q.id}",
-                    "status": q.status,
-                    "content": q.question,
-                    "options": [
-                        {"id": opt.id, "text": f"{chr(65 + i)}. {opt.option_text}"}
-                        for i, opt in enumerate(q.options.all())
-                    ],
-                    "answer": f"{get_correct_option_label(q)}. {q.correct_option.option_text}" if q.correct_option else "",
-                    "explanation": q.explanation or "",
-                    "discussions": [],
-                    "myAnswer": None
-                }
-                for q in quizzes
-            ]
+            "questions": question_list
         }
         return Response(data)
     except Presentation.DoesNotExist:
@@ -433,3 +459,139 @@ def audience_after_view(request, presentation_id, user_id):
         'user_id': request.user.id if request.user.is_authenticated else None,
     }
     return render(request, 'presentations/after/audience_afterp.html', context)
+
+def speaker_after_view(request, presentation_id, user_id):
+    presentation = get_object_or_404(Presentation, id=presentation_id)
+    user = get_object_or_404(User, id=user_id)
+
+    feedbacks = presentation.feedback_set.all()
+    quizzes = Quiz.objects.filter(presentation=presentation).order_by('id')
+
+    total_accuracy = 0
+    count_with_answers = 0
+    quiz_stats = []
+
+    for quiz in quizzes:
+        sessions = QuizSession.objects.filter(quiz=quiz)
+        total_answers = sessions.count()
+        correct_answers = sessions.filter(is_correct=True).count()
+
+        option_stats = sessions.values('selected_option__id').annotate(count=Count('id'))
+        option_count_map = {stat['selected_option__id']: stat['count'] for stat in option_stats}
+
+        options = QuizOption.objects.filter(quiz=quiz).order_by('id')
+        option_list = []
+        for i, opt in enumerate(options):
+            label = chr(65 + i)
+            option_list.append({
+                'label': label,
+                'text': opt.option_text,
+                'count': option_count_map.get(opt.id, 0)
+            })
+
+        accuracy = (correct_answers / total_answers * 100) if total_answers > 0 else None
+        if accuracy is not None:
+            total_accuracy += accuracy
+            count_with_answers += 1
+
+        correct_option_text = ""
+        if quiz.correct_option:
+            correct_option_text = quiz.correct_option.option_text
+
+        # 关联讨论和评论
+        try:
+            discussion = Discussion.objects.get(quiz=quiz)
+            comments = Comment.objects.filter(discussion=discussion).order_by('created_at')
+        except Discussion.DoesNotExist:
+            comments = []
+
+        quiz_stats.append({
+            'quiz': quiz,
+            'options': option_list,
+            'total_answers': total_answers,
+            'correct_answers': correct_answers,
+            'accuracy': accuracy,
+            'correct_option_text': correct_option_text,
+            'comments': comments,
+        })
+
+    average_accuracy = (total_accuracy / count_with_answers) if count_with_answers > 0 else None
+
+    context = {
+        'presentation': presentation,
+        'feedbacks': feedbacks,
+        'quiz_stats': quiz_stats,
+        'average_accuracy': average_accuracy,
+    }
+
+    return render(request, 'presentations/after/speaker_afterp.html', context)
+
+
+def organizer_after_view(request, presentation_id, user_id):
+    presentation = get_object_or_404(Presentation, id=presentation_id)
+
+    # 获取反馈
+    feedbacks = Feedback.objects.filter(presentation=presentation).order_by('-submitted_at')
+
+    # 获取题目
+    quizzes = Quiz.objects.filter(presentation=presentation)
+
+    # 计算答题统计
+    quiz_stats = []
+    total_accuracy = 0
+    count_with_answers = 0
+    for quiz in quizzes:
+        sessions = QuizSession.objects.filter(quiz=quiz)
+        total_answers = sessions.count()
+        correct_answers = sessions.filter(is_correct=True).count()
+
+        # 统计选项被选次数
+        option_stats = sessions.values('selected_option__id').annotate(count=Count('id'))
+        option_count_map = {stat['selected_option__id']: stat['count'] for stat in option_stats}
+
+        options_result = []
+        options = quiz.options.all()
+        for i, opt in enumerate(options):
+            label = chr(65 + i)
+            options_result.append({
+                'label': label,
+                'text': opt.option_text,
+                'count': option_count_map.get(opt.id, 0)
+            })
+
+        accuracy = round((correct_answers / total_answers) * 100, 2) if total_answers > 0 else None
+        if accuracy is not None:
+            total_accuracy += accuracy
+            count_with_answers += 1
+
+        # 查询评论
+        try:
+            discussion = Discussion.objects.get(quiz=quiz)
+            comments = Comment.objects.filter(discussion=discussion).order_by('created_at')
+        except Discussion.DoesNotExist:
+            comments = []
+
+        # 取正确答案文字
+        correct_option_text = ''
+        if quiz.correct_option:
+            correct_option_text = quiz.correct_option.option_text
+
+        quiz_stats.append({
+            'quiz': quiz,
+            'total_answers': total_answers,
+            'correct_answers': correct_answers,
+            'accuracy': accuracy,
+            'options': options_result,
+            'comments': comments,
+            'correct_option_text': correct_option_text,
+        })
+
+    average_accuracy = round(total_accuracy / count_with_answers, 2) if count_with_answers > 0 else None
+
+    context = {
+        'presentation': presentation,
+        'feedbacks': feedbacks,
+        'quiz_stats': quiz_stats,
+        'average_accuracy': average_accuracy,
+    }
+    return render(request, 'presentations/after/organizer_afterp.html', context)

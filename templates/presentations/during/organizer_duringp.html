@@ -40,7 +40,8 @@
                 {% if feedbacks %}
                     {% for fb in feedbacks %}
                         <li class="feedback-item">
-                            <div class="feedback-content">{{ fb.content }}</div>
+{#                            <div class="feedback-content">{{ fb.content }}</div>#}
+                            <span class="feedback-content">{{ fb.reason }}</span>
                             <div class="feedback-user">
                                 {{ fb.user.username }}<br>
                                 <small>{{ fb.created_at|date:"Y-m-d H:i" }}</small>
@@ -92,11 +93,16 @@ function getCookie(name) {
 
 const csrftoken = getCookie('csrftoken');
 const presentationId = "{{ presentation.id }}";
+
+const feedbackListUrl = "{% url 'get_feedbacks' presentation.id %}";
 let currentQuestionIndex = 0;
 let questions = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     loadQuestions();
+    loadFeedbacks();  // 首次加载
+
+    setInterval(loadFeedbacks, 10000); // 每 10 秒轮询反馈
 
     // 绑定导航按钮事件
     document.getElementById('prevQuestionBtn').addEventListener('click', () => {
@@ -323,6 +329,44 @@ function autoGenerateQuiz(presentationId) {
         }
     });
 }
+
+
+// 加载反馈
+function loadFeedbacks() {
+    fetch(feedbackListUrl)
+        .then(res => res.json())
+        .then(data => {
+            const feedbackList = document.getElementById('feedbackList');
+            if (!feedbackList) return;
+
+            if (data.code === 0 && data.feedbacks.length > 0) {
+                feedbackList.innerHTML = '';
+                data.feedbacks.forEach(fb => {
+                    const li = document.createElement('li');
+                    li.className = 'feedback-item';
+                    li.innerHTML = `
+                        <span class="feedback-content">${fb.reason}</span>
+                        <div class="feedback-user">
+                            ${fb.user}<br>
+                            <small>${fb.time}</small>
+                        </div>
+                    `;
+                    feedbackList.appendChild(li);
+                });
+            } else {
+                feedbackList.innerHTML = '<li class="empty-tip">暂无反馈</li>';
+            }
+        })
+        .catch(() => {
+            const feedbackList = document.getElementById('feedbackList');
+            if (feedbackList) {
+                feedbackList.innerHTML = '<li class="empty-tip">加载失败</li>';
+            }
+        });
+}
+
+
+
     </script>
 </body>
 </html>

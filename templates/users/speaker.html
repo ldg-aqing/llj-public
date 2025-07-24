@@ -54,12 +54,13 @@
                         </div>
 
                         {% if presentation.status == 'PENDING' %}
-                            <button class="enter-btn" type="button" onclick="window.location.href='{% url 'upload_material' presentation.speaker.id presentation.id %}'">开始演讲</button>
+                            <button class="enter-btn" type="button" onclick="window.location.href='{% url 'upload_material' presentation.speaker.id presentation.id %}'">上传资料</button>
                         {% elif presentation.status == 'LIVE' %}
                             <button class="enter-btn" disabled>进行中</button>
                         {% elif presentation.status == 'FINISHED' %}
                        <!-- 假设你在详情页或者其它页面 -->
-                            <button class="enter-btn" onclick="window.location.href='{% url 'show_feedbacks' presentation.id %}'">查看</button>
+                         <a href="{% url 'speaker_after' presentation.id user.id %}" class="enter-btn">查看报告</a>
+
                         {% endif %}
                     </div>
                 {% endfor %}
