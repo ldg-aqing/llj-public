@@ -407,14 +407,22 @@ function submitAnswer(questionId) {
 
             let myAnswerDiv = document.querySelector(`#my-answer-${questionId}`);
             if (!myAnswerDiv) {
-                const questionBox = document.querySelector(`.question-box[data-question-id="${questionId}"]`);
-                myAnswerDiv = document.createElement('div');
-                myAnswerDiv.id = `my-answer-${questionId}`;
-                myAnswerDiv.className = 'my-answer';
-                questionBox.appendChild(myAnswerDiv);
+                const questionContainer = document.querySelector(`.single-question-container[data-question-id="${questionId}"]`);
+                const questionBox = questionContainer ? questionContainer.querySelector('.question-box') : null;
+
+                if (questionBox) {
+                    myAnswerDiv = document.createElement('div');
+                    myAnswerDiv.id = `my-answer-${questionId}`;
+                    myAnswerDiv.className = 'my-answer';
+                    questionBox.appendChild(myAnswerDiv);
+                }
             }
+
+        // 如果找到了或创建了 myAnswerDiv，就更新内容
+        if (myAnswerDiv) {
             myAnswerDiv.textContent = '我的答案: ' + answerText;
             myAnswerDiv.style.display = 'block';
+        }
 
         } else {
             alert(data.error || '提交失败');
