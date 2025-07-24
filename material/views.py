@@ -10,9 +10,12 @@ ALLOWED_EXT = ['pptx', 'pdf']  # 限制上传类型
 
 def material_list(request):
     materials = UploadedMaterial.objects.all()
+
     return render(request, 'material_list.html', {'materials': materials})
 
 def upload_material(request, speaker_id, presentation_id):
+    last_uploaded_file = ''
+
     if request.method == 'POST' and 'delete_id' in request.POST:
         delete_id = request.POST.get('delete_id')
         try:
@@ -25,6 +28,7 @@ def upload_material(request, speaker_id, presentation_id):
     if request.method == 'POST' and 'file' in request.FILES:
         file = request.FILES.get('file')
         file_type = request.POST.get('file_type', '').upper()
+        last_uploaded_file = file.name  # ✅ 保存上传名
 
         # 保存临时文件
         temp_dir = 'media/temp'
@@ -49,11 +53,11 @@ def upload_material(request, speaker_id, presentation_id):
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
-    # ✅ 获取该演讲下的所有上传文件
     materials = Upload.objects.filter(presentation_id=presentation_id).order_by('-uploaded_at')
 
     return render(request, 'upload.html', {
         'speaker_id': speaker_id,
         'presentation_id': presentation_id,
         'materials': materials,
+        'last_uploaded_file': last_uploaded_file,
     })

@@ -190,7 +190,7 @@
 
         <!-- 严格按图片样式的上传表单 -->
         <div class="upload-form">
-            <h2 class="upload-title">上传文件（PDF / PPTX ）</h2>
+            <h2 class="upload-title">上传文件（PDF / PPTX / TXT）</h2>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
@@ -221,46 +221,38 @@
         <!-- 内容列表区 -->
         <div class="content-list">
             <div class="list-title">已上传内容列表</div>
-
-            {% if materials %}
-                <div id="contentItems">
-                    {% for item in materials %}
-                    <div class="content-item">
-                        <span class="content-name">{{ item.file_path }}</span>
-                        <div class="content-actions">
-                            <!-- 可加查看提取内容 -->
-                            <button class="view-btn" onclick="alert(`{{ item.content|escapejs }}`)">查看内容</button>
-                            <form method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="delete_id" value="{{ item.id }}">
-                                <button class="delete-btn" onclick="return confirm('确定删除此内容？')">删除</button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-tip" id="emptyTip">暂无上传内容</div>
-            {% endif %}
+            <div class="empty-tip" id="emptyTip">暂无上传内容</div>
+            <div id="contentItems"></div>
         </div>
-
-
     </div>
 
     <script>
         // 模拟从后端获取演讲信息
-            document.addEventListener('DOMContentLoaded', function () {
-        const fileInput = document.getElementById('file-input');
-        const hint = document.querySelector('.file-input-hint');
+        document.addEventListener('DOMContentLoaded', function() {
+            const presentationData = {
+                name: "人工智能前沿技术分享",
+                speaker: "张教授",
+                organizer: "王助理",
+                audience: 42,
+                status: "未开始"
+            };
 
-        fileInput.addEventListener('change', function () {
-            if (this.files.length > 0) {
-                hint.textContent = this.files[0].name;
-            } else {
-                hint.textContent = '未选择文件';
-            }
+            document.getElementById('presentation-name').textContent = presentationData.name;
+            document.getElementById('presentation-speaker').textContent = presentationData.speaker;
+            document.getElementById('presentation-organizer').textContent = presentationData.organizer;
+            document.getElementById('presentation-audience').textContent = presentationData.audience + '人';
+            document.getElementById('presentation-status').textContent = presentationData.status;
+
+            // 文件选择显示
+            document.getElementById('file-input').addEventListener('change', function(e) {
+                const hint = document.querySelector('.file-input-hint');
+                if (this.files.length > 0) {
+                    hint.textContent = this.files[0].name;
+                } else {
+                    hint.textContent = '未选择文件';
+                }
+            });
         });
-    });
 
         function addNewContent(contentName) {
             const emptyTip = document.getElementById('emptyTip');
