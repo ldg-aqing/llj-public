@@ -58,29 +58,15 @@
 
         <!-- 演讲列表区 -->
         <div class="presentation-list-container">
-            <div class="presentation-list">
-                {% for presentation in presentations %}
-                    <div class="presentation-item">
-                        <div class="presentation-details">
-                            <div class="presentation-name">{{ presentation.title }}</div>
-                            <div class="presentation-status">状态：{{ presentation.get_status_display }}</div>
-                        </div>
+        <div class="presentation-list" id="presentationList">
+            <div class="empty-tip">加载中...</div>
+        </div>
 
-                        {% if presentation.status == 'PENDING' %}
-                        <button class="enter-btn" type="button" onclick="window.location.href='/presentations/manage/{{ presentation.id }}/'">管理</button>
-                        {% elif presentation.status == 'LIVE' %}
-                        <button class="enter-btn" type="button" onclick="window.location.href='/presentations/during/{{ presentation.id }}/'">进入演讲</button>
-                        {% elif presentation.status == 'FINISHED' %}
-                      <a href="/api/feedbacks/report/organizer/{{ presentation.id }}/" class="enter-btn">查看报告</a>
-
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </div>
         </div>
     </div>
 
     <script>
+
                 // 可以添加前端验证或AJAX提交逻辑
         document.querySelector('.create-form').addEventListener('submit', function(e) {
             const input = this.querySelector('.presentation-input');
@@ -102,6 +88,61 @@
                 createSection.classList.remove('welcome-animation');
             }, 2000);
         });
+
+        function loadPresentationList() {
+            fetch('/presentations/api/presentations/list/')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('presentationList');
+                    const userId = data.user_id;
+                    if (data.code !== 0 || !data.presentations) {
+                        container.innerHTML = '<div class="empty-tip">加载失败</div>';
+                        return;
+                    }
+
+                    const presentations = data.presentations;
+                    if (!presentations.length) {
+                        container.innerHTML = '<div class="empty-tip">暂无演讲</div>';
+                        return;
+                    }
+
+                    container.innerHTML = '';  // 清空旧内容
+
+                    presentations.forEach(p => {
+                        let actionBtn = '';
+                        if (p.status === 'PENDING') {
+                            actionBtn = `<button class="enter-btn" onclick="window.location.href='/presentations/manage/${p.id}/'">管理</button>`;
+                        } else if (p.status === 'LIVE') {
+                            actionBtn = `<button class="enter-btn" onclick="window.location.href='/presentations/during/${p.id}/'">进入演讲</button>`;
+                        } else if (p.status === 'FINISHED') {
+                            actionBtn = `<a href="/presentations/after/organizer_after/${p.id}/${userId}/" class="enter-btn">查看报告</a>`;
+                        }
+
+                        const html = `
+                            <div class="presentation-item">
+                                <div class="presentation-details">
+                                    <div class="presentation-name">${p.title}</div>
+                                    <div class="presentation-status">状态：${p.status_display}</div>
+                                </div>
+                                ${actionBtn}
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', html);
+                    });
+                })
+                .catch(() => {
+                    const container = document.getElementById('presentationList');
+                    container.innerHTML = '<div class="empty-tip">加载失败</div>';
+                });
+        }
+
+        // 页面加载后执行一次，并每10秒轮询
+        document.addEventListener('DOMContentLoaded', function () {
+            loadPresentationList();
+            setInterval(loadPresentationList, 10000);
+        });
+
+
     </script>
 </body>
 </html>

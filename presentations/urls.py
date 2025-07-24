@@ -1,6 +1,6 @@
 # presentations/urls.py
 from django.urls import path
-from .views import speaker_home
+from .views import speaker_home, speaker_presentation_list, audience_presentation_list
 from .views import organizer_home
 from .views import audience_home
 from . import views
@@ -11,6 +11,10 @@ urlpatterns = [
     path('speaker/', speaker_home, name='speaker_home'),
     path('before/<int:presentation_id>/', views.start_presentation, name='speaker_before_presentation'),
     path('organizer/',  organizer_home, name=' organizer_home'),
+    path('api/presentations/list/', views.organizer_presentation_list_api,name='organizer_presentation_list_api'),
+    path('api/presentations/speaker_list/', speaker_presentation_list,name='speaker_presentation_list'),
+    path('api/presentations/audience_list/', audience_presentation_list,name='audience_presentation_list'),
+
     path('audience/',  audience_home, name='audience_home'),
     path('create/', views.create_presentation, name='create_presentation'),
 
@@ -35,4 +39,10 @@ urlpatterns = [
         views.audience_presentation_detail
     ),
     path('api/presentations/submit_answer/', submit_answer_api, name='submit_answer_api'),
+
+    path('after/audience_after/<int:presentation_id>/<int:user_id>/', views.audience_after_view, name='audience_after'),
+    path('after/speaker_after/<int:presentation_id>/<int:user_id>/', views.speaker_after_view, name='speaker_after'),
+    path('after/organizer_after/<int:presentation_id>/<int:user_id>/', views.organizer_after_view,name='organizer_after'),
+    path('end/<int:presentation_id>/', views.end_presentation, name='end_presentation'),
+
 ]

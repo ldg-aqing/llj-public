@@ -1,11 +1,317 @@
-<h1>观众报告：{{ presentation.title }}</h1>
-<h2>公开反馈</h2>
-{% for fb in feedbacks %}
-    <div>
-        类型：{{ fb.get_category_display }}<br>
-        内容：{{ fb.reason }}
+<!DOCTYPE html>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<html lang="zh-CN">
+{% load static %}
+<head>
+    <meta charset="UTF-8" />
+    <title>观众报告 - {{ presentation.title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'css/audience_duringp.css' %}">
+</head>
+
+
+<style>/* 反馈表单样式 */
+.feedback-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.feedback-type-select {
+
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid rgba(74, 107, 255, 0.2);
+    border-radius: 8px;
+    background-color: white;
+    font-size: 14px;
+    color: #333;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}
+
+.feedback-content-input {
+    width: 700px;
+    flex: 3;
+    padding: 12px 18px;
+    border: 1px solid rgba(74, 107, 255, 0.2);
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+
+.feedback-submit-btn {
+    padding: 12px 24px;
+    background: #4A6BFF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(74, 107, 255, 0.2);
+}
+
+.feedback-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 107, 255, 0.3);
+}
+</style>
+
+
+<body>
+    <div class="container">
+        <!-- 演讲信息区域 -->
+        <div class="presentation-info">
+            <button class="home-button" onclick="window.location.href='/presentations/audience/'">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+                </svg>
+                <span>返回主页</span>
+            </button>
+            <h1 class="presentation-title">观众报告：{{ presentation.title }}</h1>
+            <div class="presentation-meta">
+                <div class="meta-item"><span class="meta-label">组织者:</span> {{ presentation.organizer.username }}</div>
+                <div class="meta-item"><span class="meta-label">演讲者:</span> {{ presentation.speaker.username }}</div>
+            </div>
+        </div>
+
+        <!-- 反馈区域 -->
+       <div class="feedback-section">
+    <h2 class="section-title">听众反馈</h2>
+
+    <!-- 修改后的反馈表单 -->
+    <div class="feedback-form">
+        <form id="feedbackForm">
+            <div class="feedback-input-group">
+                <select id="category" name="category" class="feedback-type-select" required>
+                    <option value="" selected disabled>反馈类型</option>
+                    <option value="SPEAKER">演讲者</option>
+                    <option value="QUIZ">题目</option>
+                    <option value="ENVIRONMENT">环境</option>
+                </select>
+
+                <input type="text" id="reason" name="reason" class="feedback-content-input"
+                       placeholder="请输入您的反馈..." required>
+
+                <button type="submit" class="feedback-submit-btn">提交</button>
+            </div>
+        </form>
     </div>
-    <hr>
-{% empty %}
-    <p>暂无反馈。</p>
-{% endfor %}
+
+    <!-- 历史反馈列表保持不变 -->
+    <ul class="feedback-list">
+        {% for fb in feedbacks %}
+        <li class="feedback-item">
+            <div class="feedback-content">
+                <strong>{{ fb.get_category_display }}：</strong>{{ fb.reason }}
+            </div>
+            <div class="feedback-user">
+                {{ fb.user.username }}<br>
+                <small>{{ fb.created_at|date:"Y-m-d H:i" }}</small>
+            </div>
+        </li>
+        {% empty %}
+        <li class="empty-tip">暂无反馈</li>
+        {% endfor %}
+    </ul>
+</div>
+
+        <!-- 答题区域 -->
+        <div class="question-section">
+            <h2 class="section-title">题目回顾</h2>
+
+            {% if quiz_data %}
+            <!-- 单题导航 -->
+            <div class="question-navigation">
+                <button class="nav-btn" id="prevQuestion">上一题</button>
+                <div class="question-counter">
+                    题目 <span id="currentQuestion">1</span> / {{ quiz_data|length }}
+                </div>
+                <button class="nav-btn" id="nextQuestion">下一题</button>
+            </div>
+
+            <!-- 单题显示容器 -->
+            <div id="singleQuestionContainer">
+                {% for item in quiz_data %}
+                <div class="single-question-container" data-quiz-id="{{ forloop.counter0 }}">
+                    <div class="question-box">
+                        <div class="question-header">
+                            <span class="question-title">{{ item.quiz.question }}</span>
+                            <span class="question-status status-completed">已结束</span>
+                        </div>
+
+                        <div class="question-content">
+                            <div class="question-text">{{ item.quiz.content }}</div>
+
+                            <ul class="question-options">
+                                {% for option in item.options %}
+                                <li class="question-option
+                                    {% if option.id == item.quiz.correct_option.id %}correct-option{% endif %}
+                                    {% if option.id == item.selected_option.id %}user-answer{% endif %}
+                                    {% if option.id == item.selected_option.id and option.id != item.quiz.correct_option.id %}user-incorrect{% endif %}">
+                                    <input type="radio" id="option-{{ option.id }}"
+                                           {% if option.id == item.selected_option.id %}checked{% endif %} disabled>
+                                    <label for="option-{{ option.id }}">{{ option.text }}</label>
+                                </li>
+                                {% endfor %}
+                            </ul>
+
+
+                            <div class="my-answer" style="display: block;">
+                                <span class="answer-label">我的答案：</span>
+                                <span class="myanswer-text">{{ item.selected_option.text|default:"未答" }}</span>
+                            </div>
+
+                            <div class="question-answer" style="display: block;">
+                                <span class="answer-label">参考答案：</span>
+                                <span class="answer-text">{{ item.correct_option_text }}</span>
+                            </div>
+
+                            <div class="question-explanation" style="display: block;">
+                                <span class="explanation-label">解析：</span>
+                                <span>{{ item.quiz.explanation }}</span>
+                            </div>
+                        </div>
+
+                        <!-- 讨论区 -->
+                        <div class="discussion-area">
+                            <h3 class="section-title">讨论区</h3>
+
+                            <ul class="discussion-list">
+                                {% for comment in item.comments %}
+                                <div class="discussion-item">
+                                    <div class="discussion-content">{{ comment.content }}</div>
+                                    <div class="discussion-user">
+                                        {{ comment.user.username }}<br>
+                                        <small>{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="empty-tip">暂无评论</div>
+                                {% endfor %}
+                            </ul>
+
+          <form class="comment-form" data-quiz-id="{{ item.quiz.id }}">
+            <textarea name="content" class="comment-input" placeholder="写评论..." required></textarea><br>
+            <button class="nav-btn"type="submit">提交评论</button>
+          </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-tip">暂无题目</div>
+            {% endif %}
+        </div>
+    </div>
+
+   <script>
+   // 反馈表单提交
+document.getElementById('feedbackForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const category = document.getElementById('category').value;
+    const reason = document.getElementById('reason').value;
+    axios.post('/api/feedbacks/{{ presentation.id }}/', {
+        category: category,
+        reason: reason
+    })
+    .then(response => {
+        alert('反馈提交成功');
+        location.reload();
+    })
+    .catch(error => {
+        alert('反馈提交失败: ' + error.response?.data?.msg || error);
+    });
+});
+
+// 评论表单提交（事件委托）
+document.querySelectorAll('.comment-form').forEach(form => {
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const quizId = this.getAttribute('data-quiz-id');
+        const content = this.querySelector('textarea[name="content"]').value;
+
+        // 假设 user_id 在前端通过登录状态持有，示例这里硬编码为1，实际用你的登录逻辑传入
+        const userId = 1;
+
+        axios.post(`/api/discussions/quiz/${quizId}/comments/post/`, {
+            user_id: userId,
+            content: content
+        })
+        .then(response => {
+            alert('评论提交成功');
+            location.reload();
+        })
+        .catch(error => {
+            alert('评论提交失败: ' + error.response?.data?.msg || error);
+        });
+    });
+});
+
+    // 单题显示逻辑
+    document.addEventListener('DOMContentLoaded', function() {
+        const questions = document.querySelectorAll('.single-question-container');
+        const prevBtn = document.getElementById('prevQuestion');
+        const nextBtn = document.getElementById('nextQuestion');
+        const currentQuestionDisplay = document.getElementById('currentQuestion');
+
+        let currentQuestion = 0;
+
+        // 初始化显示第一题
+        function initQuestionDisplay() {
+            questions.forEach((q, index) => {
+                q.style.display = index === 0 ? 'block' : 'none';
+            });
+            updateNavButtons();
+        }
+
+        // 显示指定题目
+        function showQuestion(index) {
+            currentQuestion = index;
+            questions.forEach((q, i) => {
+                q.style.display = i === index ? 'block' : 'none';
+            });
+            currentQuestionDisplay.textContent = index + 1;
+            updateNavButtons();
+        }
+
+        // 更新导航按钮状态
+        function updateNavButtons() {
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = currentQuestion === questions.length - 1;
+        }
+
+        // 事件监听
+        prevBtn.addEventListener('click', function() {
+            if (currentQuestion > 0) {
+                showQuestion(currentQuestion - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', function() {
+            if (currentQuestion < questions.length - 1) {
+                showQuestion(currentQuestion + 1);
+            }
+        });
+
+        // 初始化
+        if (questions.length > 0) {
+            initQuestionDisplay();
+        } else {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            currentQuestionDisplay.style.display = 'none';
+        }
+    });
+    </script>
+</body>
+</html>

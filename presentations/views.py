@@ -1,19 +1,23 @@
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from rest_framework.decorators import  permission_classes
 from rest_framework.permissions import IsAuthenticated
 import logging
+
 from users.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from presentations.models import Presentation, PresentationAttendee
 from material.forms import UploadForm
 from uploads.models import Upload
-from django.views.decorators.http import require_POST
-from feedback.models import Feedback
+from django.views.decorators.http import require_POST, require_GET
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from quizzes.models import Quiz, QuizOption, QuizSession
 from django.db.models import Case, When, Value, IntegerField
 from django.views.decorators.csrf import csrf_exempt
+from feedback.models import Feedback
+from discussions.models import Discussion, Comment
+from django.db.models import Count
 def speaker_home(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -32,6 +36,24 @@ def speaker_home(request):
         'user': user,
         'presentations': presentations,
     })
+
+def speaker_presentation_list(request):
+    user_id = request.session.get('user_id')
+    user = User.objects.filter(id=user_id, role='SPEAKER').first()
+    if not user:
+        return JsonResponse({'code': 1, 'msg': '无效用户'}, status=403)
+
+    presentations = Presentation.objects.filter(speaker=user)
+    data = [
+        {
+            'id': p.id,
+            'title': p.title,
+            'status': p.status,
+            'status_display': p.get_status_display()
+        } for p in presentations
+    ]
+    return JsonResponse({'code': 0, 'presentations': data, 'user_id': user.id})
+
 
 def organizer_home(request):
     user_id = request.session.get('user_id')
@@ -68,6 +90,31 @@ def organizer_home(request):
         'speakers': speakers
     })
 
+@require_GET
+def organizer_presentation_list_api(request):
+    user_id = request.session.get('user_id')
+    try:
+        user = User.objects.get(id=user_id, role='ORGANIZER')
+    except User.DoesNotExist:
+        return JsonResponse({'code': 1, 'msg': '用户不存在'}, status=403)
+
+    presentations = Presentation.objects.filter(organizer=user).order_by('-id')
+
+    data = []
+    for p in presentations:
+        data.append({
+            'id': p.id,
+            'title': p.title,
+            'status': p.status,
+            'status_display': p.get_status_display(),
+        })
+
+    return JsonResponse({
+        'code': 0,
+        'presentations': data,
+        'user_id': user.id  # ✅ 添加这行
+    })
+
 def audience_home(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -87,6 +134,25 @@ def audience_home(request):
         'user': user,
         'presentations': presentations,
     })
+
+def audience_presentation_list(request):
+    user_id = request.session.get('user_id')
+    user = User.objects.filter(id=user_id, role='AUDIENCE').first()
+    if not user:
+        return JsonResponse({'code': 1, 'msg': '无效用户'}, status=403)
+
+    entries = PresentationAttendee.objects.filter(attendee=user)
+    presentations = [e.presentation for e in entries]
+
+    data = [
+        {
+            'id': p.id,
+            'title': p.title,
+            'status': p.status,
+            'status_display': p.get_status_display()
+        } for p in presentations
+    ]
+    return JsonResponse({'code': 0, 'presentations': data, 'user_id': user.id})  # ✅ 注意补上 user_id
 
 
 def start_presentation(request, pk):
@@ -256,6 +322,14 @@ def audience_during_presentation(request, presentation_id):
 
 @api_view(['GET'])
 def audience_presentation_detail(request, presentation_id):
+    user_id = request.GET.get('user_id')  #  从前端 URL 参数获取
+    user = None
+    if user_id:
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            user = None
+
     try:
         presentation = Presentation.objects.get(id=presentation_id)
         quizzes = Quiz.objects.filter(presentation_id=presentation_id, status__in=['active', 'completed']).annotate(
@@ -278,6 +352,39 @@ def audience_presentation_detail(request, presentation_id):
             except Exception:
                 return ""
 
+        question_list = []
+        for q in quizzes:
+            user_answer = None
+
+            if user:
+                session = QuizSession.objects.filter(quiz=q, user=user).first()
+                if session and session.selected_option:
+                    options = list(q.options.all())
+                    try:
+                        idx = options.index(session.selected_option)
+                        label = chr(65 + idx)
+                    except:
+                        label = ''
+                    user_answer = {
+                        "option_id": session.selected_option.id,
+                        "option_text": f"{label}. {session.selected_option.option_text}"
+                    }
+
+            question_list.append({
+                "id": q.id,
+                "title": f"题目 #{q.id}",
+                "status": q.status,
+                "content": q.question,
+                "options": [
+                    {"id": opt.id, "text": f"{chr(65 + i)}. {opt.option_text}"}
+                    for i, opt in enumerate(q.options.all())
+                ],
+                "answer": f"{get_correct_option_label(q)}. {q.correct_option.option_text}" if q.correct_option else "",
+                "explanation": q.explanation or "",
+                "discussions": [],
+                "user_answer": user_answer  # ✅ 用于前端显示“我的答案”
+            })
+
         data = {
             "presentation": {
                 "id": presentation.id,
@@ -297,23 +404,8 @@ def audience_presentation_detail(request, presentation_id):
                 }
                 for fb in feedbacks
             ],
-            "questions": [
-                {
-                    "id": q.id,
-                    "title": f"题目 #{q.id}",
-                    "status": q.status,
-                    "content": q.question,
-                    "options": [
-                        {"id": opt.id, "text": f"{chr(65 + i)}. {opt.option_text}"}
-                        for i, opt in enumerate(q.options.all())
-                    ],
-                    "answer": f"{get_correct_option_label(q)}. {q.correct_option.option_text}" if q.correct_option else "",
-                    "explanation": q.explanation or "",
-                    "discussions": [],
-                    "myAnswer": None
-                }
-                for q in quizzes
-            ]
+            "questions": question_list,
+
         }
         return Response(data)
     except Presentation.DoesNotExist:
@@ -356,3 +448,250 @@ def submit_answer_api(request):
     )
     return Response({'success': True, 'is_correct': session.is_correct ,
                      'selected_option_id': option.id,})
+
+def audience_after_view(request, presentation_id, user_id):
+    # 获取演讲对象
+    presentation = get_object_or_404(Presentation, id=presentation_id)
+    # 根据 user_id 获取用户对象
+    user = get_object_or_404(User, id=user_id)
+
+    # 获取该演讲所有反馈（如果需要过滤公开，确保category值正确）
+    feedbacks = Feedback.objects.filter(presentation=presentation)
+
+    # 获取该演讲的所有题目
+    quizzes = Quiz.objects.filter(presentation=presentation).order_by('id')
+    # 获取该用户针对这些题目的答题记录
+    user_sessions = QuizSession.objects.filter(user=user, quiz__in=quizzes)
+
+    quiz_data = []
+    for quiz in quizzes:
+        # 获取题目所有选项并标记 A B C D ...
+        options = QuizOption.objects.filter(quiz=quiz).order_by('id')
+        option_list = []
+        for i, opt in enumerate(options):
+            option_list.append({
+                'label': chr(65 + i),  # 'A', 'B', 'C', 'D'
+                'text': opt.option_text,
+                'id': opt.id,
+            })
+
+        # 获取该用户这题的答题记录
+        session = user_sessions.filter(quiz=quiz).first()
+
+        # 找用户选项对应的字母
+        selected_label = None
+        if session and session.selected_option:
+            for opt in option_list:
+                if opt['id'] == session.selected_option.id:
+                    selected_label = opt['label']
+                    break
+
+        # 找正确选项对应的字母
+        correct_label = None
+        if quiz.correct_option:
+            for opt in option_list:
+                if opt['id'] == quiz.correct_option.id:
+                    correct_label = opt['label']
+                    break
+
+        # 拼接显示文字
+        selected_option_text = (selected_label + ". " if selected_label else "") + (
+            session.selected_option.option_text if session and session.selected_option else "")
+        correct_option_text = (correct_label + ". " if correct_label else "") + (
+            quiz.correct_option.option_text if quiz.correct_option else "")
+
+        # 关联查询该题对应的讨论和评论
+        try:
+            discussion = Discussion.objects.get(quiz=quiz)
+            comments = Comment.objects.filter(discussion=discussion).order_by('created_at')
+        except Discussion.DoesNotExist:
+            comments = []
+
+        quiz_data.append({
+            'quiz': quiz,
+            'options': option_list,
+            'selected_option_text': selected_option_text,
+            'correct_option_text': correct_option_text,
+            'is_correct': session.is_correct if session else None,
+            'explanation': quiz.explanation or "",
+            'comments': comments,  # 评论列表
+        })
+
+    context = {
+        'presentation': presentation,
+        'feedbacks': feedbacks,
+        'quiz_data': quiz_data,
+        'user_id': request.user.id if request.user.is_authenticated else None,
+    }
+    return render(request, 'presentations/after/audience_afterp.html', context)
+
+def speaker_after_view(request, presentation_id, user_id):
+    presentation = get_object_or_404(Presentation, id=presentation_id)
+    user = get_object_or_404(User, id=user_id)
+
+    feedbacks = presentation.feedback_set.all()
+    quizzes = Quiz.objects.filter(presentation=presentation).order_by('id')
+
+    total_accuracy = 0
+    count_with_answers = 0
+    quiz_stats = []
+
+    for quiz in quizzes:
+        sessions = QuizSession.objects.filter(quiz=quiz)
+        total_answers = sessions.count()
+        correct_answers = sessions.filter(is_correct=True).count()
+
+        option_stats = sessions.values('selected_option__id').annotate(count=Count('id'))
+        option_count_map = {stat['selected_option__id']: stat['count'] for stat in option_stats}
+
+        options = QuizOption.objects.filter(quiz=quiz).order_by('id')
+        option_list = []
+        for i, opt in enumerate(options):
+            label = chr(65 + i)
+            option_list.append({
+                'label': label,
+                'text': opt.option_text,
+                'count': option_count_map.get(opt.id, 0)
+            })
+
+        accuracy = (correct_answers / total_answers * 100) if total_answers > 0 else None
+        if accuracy is not None:
+            total_accuracy += accuracy
+            count_with_answers += 1
+
+        correct_option_text = ""
+        if quiz.correct_option:
+            correct_option_text = quiz.correct_option.option_text
+
+        # 关联讨论和评论
+        try:
+            discussion = Discussion.objects.get(quiz=quiz)
+            comments = Comment.objects.filter(discussion=discussion).order_by('created_at')
+        except Discussion.DoesNotExist:
+            comments = []
+
+        quiz_stats.append({
+            'quiz': quiz,
+            'options': option_list,
+            'total_answers': total_answers,
+            'correct_answers': correct_answers,
+            'accuracy': accuracy,
+            'correct_option_text': correct_option_text,
+            'comments': comments,
+        })
+
+    average_accuracy = (total_accuracy / count_with_answers) if count_with_answers > 0 else None
+
+    context = {
+        'presentation': presentation,
+        'feedbacks': feedbacks,
+        'quiz_stats': quiz_stats,
+        'average_accuracy': average_accuracy,
+    }
+
+    return render(request, 'presentations/after/speaker_afterp.html', context)
+
+
+def organizer_after_view(request, presentation_id, user_id):
+    presentation = get_object_or_404(Presentation, id=presentation_id)
+
+    # 获取反馈
+    feedbacks = Feedback.objects.filter(presentation=presentation).order_by('-submitted_at')
+
+    # 获取题目
+    quizzes = Quiz.objects.filter(presentation=presentation)
+
+    # 计算答题统计
+    quiz_stats = []
+    total_accuracy = 0
+    count_with_answers = 0
+    for quiz in quizzes:
+        sessions = QuizSession.objects.filter(quiz=quiz)
+        total_answers = sessions.count()
+        correct_answers = sessions.filter(is_correct=True).count()
+
+        # 统计选项被选次数
+        option_stats = sessions.values('selected_option__id').annotate(count=Count('id'))
+        option_count_map = {stat['selected_option__id']: stat['count'] for stat in option_stats}
+
+        options_result = []
+        options = quiz.options.all()
+        for i, opt in enumerate(options):
+            label = chr(65 + i)
+            options_result.append({
+                'label': label,
+                'text': opt.option_text,
+                'count': option_count_map.get(opt.id, 0)
+            })
+
+        accuracy = round((correct_answers / total_answers) * 100, 2) if total_answers > 0 else None
+        if accuracy is not None:
+            total_accuracy += accuracy
+            count_with_answers += 1
+
+        # 查询评论
+        try:
+            discussion = Discussion.objects.get(quiz=quiz)
+            comments = Comment.objects.filter(discussion=discussion).order_by('created_at')
+        except Discussion.DoesNotExist:
+            comments = []
+
+        # 取正确答案文字
+        correct_option_text = ''
+        if quiz.correct_option:
+            correct_option_text = quiz.correct_option.option_text
+
+        quiz_stats.append({
+            'quiz': quiz,
+            'total_answers': total_answers,
+            'correct_answers': correct_answers,
+            'accuracy': accuracy,
+            'options': options_result,
+            'comments': comments,
+            'correct_option_text': correct_option_text,
+        })
+
+    average_accuracy = round(total_accuracy / count_with_answers, 2) if count_with_answers > 0 else None
+
+    context = {
+        'presentation': presentation,
+        'feedbacks': feedbacks,
+        'quiz_stats': quiz_stats,
+        'average_accuracy': average_accuracy,
+    }
+    return render(request, 'presentations/after/organizer_afterp.html', context)
+
+
+def end_presentation(request, presentation_id):
+    try:
+        presentation = Presentation.objects.get(id=presentation_id)
+        presentation.status = 'FINISHED'
+        presentation.save()
+
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'code': 1, 'msg': '用户未登录'})
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'code': 1, 'msg': '用户不存在'})
+
+        # 根据用户角色跳转到对应的after页面
+        if user.role == 'ORGANIZER':
+            redirect_url = f'/presentations/after/organizer_after/{presentation.id}/{user.id}/'
+        elif user.role == 'SPEAKER':
+            redirect_url = f'/presentations/after/speaker_after/{presentation.id}/{user.id}/'
+        elif user.role == 'AUDIENCE':
+            redirect_url = f'/presentations/after/audience_after/{presentation.id}/{user.id}/'
+        else:
+            redirect_url = '/users/login/'
+
+        return JsonResponse({
+            'code': 0,
+            'msg': '演讲已结束',
+            'redirect_url': redirect_url
+        })
+
+    except Presentation.DoesNotExist:
+        return JsonResponse({'code': 1, 'msg': '演讲不存在'})

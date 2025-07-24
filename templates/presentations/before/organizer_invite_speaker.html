@@ -1,175 +1,54 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>更换演讲者 - 演讲管理</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        body {
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        /* 演讲信息区域 */
-        .presentation-info {
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .presentation-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .presentation-organizer {
-            font-size: 16px;
-            color: #666;
-        }
-
-        /* 搜索区域 */
-        .search-section {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            background-color: #fff;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        .search-box:focus {
-            border-color: #4285f4;
-        }
-
-        /* 排序控制区域 */
-        .sort-controls {
-            padding: 10px 15px;
-            background-color: #fafafa;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            gap: 10px;
-        }
-
-        .sort-btn {
-            padding: 6px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: white;
-            cursor: pointer;
-            font-size: 13px;
-        }
-
-        .sort-btn.active {
-            background-color: #4285f4;
-            color: white;
-            border-color: #4285f4;
-        }
-
-        /* 演讲者列表区域 */
-        .speaker-list {
-            padding: 0;
-        }
-
-        .list-header {
-            padding: 12px 15px;
-            font-size: 14px;
-            color: #666;
-            border-bottom: 1px solid #eee;
-            background-color: #fafafa;
-        }
-
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .list-item:last-child {
-            border-bottom: none;
-        }
-
-        .speaker-name {
-            font-size: 15px;
-            color: #333;
-        }
-
-        .current-speaker {
-            font-size: 15px;
-            color: #999;
-        }
-
-        .action-btn {
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            border: none;
-            min-width: 70px;
-            text-align: center;
-        }
-
-        .change-btn {
-            background-color: #4285f4;
-            color: white;
-        }
-
-        .empty-tip {
-            text-align: center;
-            color: #999;
-            padding: 20px 0;
-            font-size: 14px;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/organizer_invite_speaker.css' %}">
 </head>
-<button class="add-btn" type="button"
-        onclick="window.location.href='/presentations/manage/{{ presentation.id }}/';"
-        style="margin: 20px 0 10px 10px;">
-    返回演讲页
-</button>
 <body>
-    <div class="speaker-list">
-    <form method="post">
-        {% csrf_token %}
-        {% for speaker in speakers %}
-        <div class="list-item">
-            <span class="speaker-name">{{ speaker.username }}</span>
-            {% if speaker.id == current_speaker.id %}
-                <span class="current-speaker">当前演讲者</span>
+
+<div class="container">
+    <div class="presentation-info">
+        <button class="home-button" onclick="window.location.href='/presentations/manage/{{ presentation.id }}/'">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+                <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+            </svg>
+            <span>返回演讲</span>
+        </button>
+        <h1 class="presentation-title">{{ presentation.title }}</h1>
+        <div class="presentation-meta">
+            <div class="meta-item">
+                <span class="meta-label">当前演讲者:</span>
+                <span id="currentSpeaker">{{ current_speaker.username }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="audience-list">
+        <div class="list-header">
+            共 {{ speakers|length }} 位可选演讲者
+        </div>
+        <div id="speakerListContainer">
+            {% if speakers %}
+                <form method="post">
+                    {% csrf_token %}
+                    {% for speaker in speakers %}
+                    <div class="list-item">
+                        <span class="audience-name">{{ speaker.username }}</span>
+                        {% if speaker.id == current_speaker.id %}
+                            <span class="current-speaker">当前演讲者</span>
+                        {% else %}
+                            <button type="submit" class="action-btn change-btn" name="speaker_id" value="{{ speaker.id }}">更换</button>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </form>
             {% else %}
-                <button type="submit" class="action-btn change-btn" name="speaker_id" value="{{ speaker.id }}">更换</button>
+                <div class="empty-tip">暂无其他演讲者</div>
             {% endif %}
         </div>
-        {% endfor %}
-    </form>
+    </div>
 </div>
-
-
-
 </body>
 </html>

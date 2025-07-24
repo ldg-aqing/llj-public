@@ -1,196 +1,104 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>演讲管理 - 组织者视图</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        body {
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        .presentation-info {
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .presentation-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .presentation-organizer {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 15px;
-        }
-        .start-btn {
-            background-color: #34a853;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .list-section {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
-        .list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .list-title {
-            font-size: 18px;
-            color: #333;
-            font-weight: 500;
-        }
-        .add-btn {
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .item-name {
-            font-size: 15px;
-            color: #333;
-        }
-        .item-type {
-            font-size: 13px;
-            color: #666;
-            margin-left: 10px;
-        }
-        .action-btn {
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            margin-left: 8px;
-        }
-        .view-btn {
-            background-color: #f1f1f1;
-            color: #333;
-            border: 1px solid #ddd;
-        }
-        .delete-btn {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .empty-tip {
-            text-align: center;
-            color: #999;
-            padding: 20px 0;
-            font-size: 14px;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/organizer_beforep.css' %}">
 </head>
 <body>
-<button class="back-btn" onclick="window.location.href='/presentations/organizer/'">← 返回主页</button>
- <div class="container">
-    <!-- 演讲信息区域 -->
-    <div class="presentation-info">
-        <h1 class="presentation-title">{{ presentation.title }}</h1>
-        <p class="presentation-organizer">组织者：<span>{{ organizer.username }}</span></p>
-        <form method="post" action="/presentations/start/{{ presentation.id }}/" style="display: inline;">
-    {% csrf_token %}
-    <button class="start-btn" type="submit">开始演讲</button>
-</form>
-    </div>
 
-    <!-- 演讲者列表区域 -->
-    <div class="list-section">
-        <div class="list-header">
-            <h2 class="list-title">演讲者列表</h2>
-        <button class="add-btn" type="button"
-        onclick="window.location.href='/presentations/organizer_invite_speaker/{{ presentation.id }}/'">
-    更换演讲者
-</button>
-
-        </div>
-        <div id="speakerList">
-            {% if speaker and speaker.username %}
-                <div class="list-item">
-                    <span class="item-name">{{ speaker.username }}</span>
+    <div class="container">
+        <!-- 演讲信息区域 -->
+        <div class="presentation-info">
+ <button class="home-button" onclick="window.location.href='/presentations/organizer/'">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+        </svg>
+        <span>返回主页</span>
+    </button>
+            <h1 class="presentation-title" id="presentationTitle">{{ presentation.title }}</h1>
+            <div class="presentation-meta">
+                <div class="meta-item">
+                    <span class="meta-label">组织者:</span>
+                    <span id="organizerName">{{ organizer.username }}</span>
                 </div>
-            {% else %}
-                <div class="empty-tip">暂无演讲者</div>
-            {% endif %}
+            </div>
         </div>
-    </div>
 
-    <!-- 文件列表区域 -->
-    <div class="list-section">
-        <div class="list-header">
-            <h2 class="list-title">演讲文件</h2>
-        </div>
-        <div id="fileList">
-            {% if uploads|length > 0 %}
-                {% for file in uploads %}
+        <!-- 演讲者列表区域 -->
+        <div class="list-section">
+                    <form method="post" action="/presentations/start/{{ presentation.id }}/" style="display: inline;">
+                {% csrf_token %}
+                <button class="start-btn" type="submit">开始演讲</button>
+            </form>
+            <div class="list-header">
+                <h2 class="list-title">演讲者列表</h2>
+                <button class="add-btn" type="button"
+                        onclick="window.location.href='/presentations/organizer_invite_speaker/{{ presentation.id }}/'">
+                    <span>更换演讲者</span>
+                </button>
+            </div>
+            <div id="speakerList">
+                {% if speaker and speaker.username %}
                     <div class="list-item">
-                        <div>
-                            <span class="item-name">{{ file.file_path }}</span>
-                            <span class="item-type">{{ file.get_file_type_display }}</span>
-                            <span class="item-type">by {{ file.user.username }}</span>
+                        <span class="item-name">{{ speaker.username }}</span>
+                    </div>
+                {% else %}
+                    <div class="empty-tip">暂无演讲者</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 文件列表区域 -->
+        <div class="list-section">
+            <div class="list-header">
+                <h2 class="list-title">演讲文件</h2>
+            </div>
+            <div id="fileList">
+                {% if uploads|length > 0 %}
+                    {% for file in uploads %}
+                        <div class="list-item">
+                            <div>
+                                <span class="item-name">{{ file.file_path }}</span>
+                                <span class="item-type">{{ file.get_file_type_display }}</span>
+                                <span class="item-type">by {{ file.user.username }}</span>
+                            </div>
+                            <div>
+                                <a href="/media/materials/{{ file.file_path }}" target="_blank" class="action-btn view-btn">查看</a>
+                            </div>
                         </div>
-             <a href="/media/materials/{{ file.file_path }}" target="_blank">查看</a>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-tip">暂无文件</div>
+                {% endif %}
+            </div>
+        </div>
 
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-tip">暂无文件</div>
-            {% endif %}
+        <!-- 听众列表区域 -->
+        <div class="list-section">
+            <div class="list-header">
+                <h2 class="list-title">听众列表</h2>
+                <button class="add-btn" type="button"
+                        onclick="window.location.href='/presentations/organizer_invite_audience/{{ presentation.id }}/'">
+                    <span>管理听众人员</span>
+                </button>
+            </div>
+            <div id="audienceList">
+                {% if attendees|length > 0 %}
+                    {% for user in attendees %}
+                        <div class="list-item">
+                            <span class="item-name">{{ user.username }}</span>
+                        </div>
+
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-tip">暂无听众</div>
+                {% endif %}
+            </div>
         </div>
     </div>
-
-    <!-- 听众列表区域 -->
-    <div class="list-section">
-        <div class="list-header">
-            <h2 class="list-title">听众列表</h2>
-         <button class="add-btn" type="button" onclick="window.location.href='/presentations/organizer_invite_audience/{{ presentation.id }}/'">管理听众人员</button>
-
-        </div>
-        <div id="audienceList">
-            {% if attendees|length > 0 %}
-                {% for user in attendees %}
-                    <div class="list-item">
-                        <span class="item-name">{{ user.username }}</span>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-tip">暂无听众</div>
-            {% endif %}
-        </div>
-    </div>
-</div>
 </body>
 </html>
