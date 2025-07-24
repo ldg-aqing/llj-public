@@ -256,7 +256,7 @@
 </head>
 <body>
 
-    <div class="container">
+    <div class="upload-container">
      <!-- 演讲信息区域 -->
         <div class="presentation-info">
  <button class="home-button" onclick="window.location.href='/presentations/speaker/'">
@@ -269,11 +269,7 @@
             <div class="presentation-meta">
                 <div class="meta-item">
                     <span class="meta-label">组织者:</span>
-                    <span id="organizerName">{{ organizer }}</span>
-                </div>
-                                <div class="meta-item">
-                    <span class="meta-label">演讲者:</span>
-                    <span id="organizerName">{{ speaker }}</span>
+                    <span id="organizerName">{{ organizer.username }}</span>
                 </div>
             </div>
         </div>
@@ -286,7 +282,7 @@
 
                 <div class="form-row">
                     <label class="form-label">文件类型:</label>
-                    <input type="text" name="file_type" class="text-input" placeholder="例如: pdf,pptx等">
+                    <input type="text" name="file_type" class="text-input" placeholder="例如: PDF、PPTX等">
                 </div>
 
                 <div class="form-row">
