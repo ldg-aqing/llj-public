@@ -127,7 +127,7 @@
     <div class="container">
         <!-- 演讲信息区域 -->
         <div class="presentation-info">
-            <button class="home-button" onclick="window.location.href='/presentations/speaker/'">
+            <button class="home-button" onclick="window.location.href='/presentations/speaker/';">
                 <svg viewBox="0 0 24 24" width="20" height="20">
                     <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
                 </svg>
@@ -168,7 +168,7 @@
 
             <div class="statistics-grid">
                 <div class="statistic-card">
-                    <div class="statistic-value">{{ total_participants }}</div>
+                    <div class="statistic-value">{{ attendees|length }}</div>
                     <div class="statistic-label">参与人数</div>
                 </div>
                 <div class="statistic-card">
@@ -176,11 +176,11 @@
                     <div class="statistic-label">平均正确率</div>
                 </div>
                 <div class="statistic-card">
-                    <div class="statistic-value">{{ total_questions }}</div>
+                    <div class="statistic-value">{{ quiz_stats|length }}</div>
                     <div class="statistic-label">题目数量</div>
                 </div>
                 <div class="statistic-card">
-                    <div class="statistic-value">{{ total_feedbacks }}</div>
+                    <div class="statistic-value">{{ allfeedbacks|length }}</div>
                     <div class="statistic-label">反馈数量</div>
                 </div>
             </div>
@@ -228,7 +228,7 @@
                             <div class="question-statistics">
                                 <div class="statistic-item">
                                     <span class="statistic-label">答题人数:</span>
-                                    <span class="statistic-value">{{ item.answer_count }}</span>
+                                    <span class="statistic-value">{{ item.total_answers }}</span>
                                 </div>
                                 <div class="statistic-item">
                                     <span class="statistic-label">正确率:</span>
@@ -237,13 +237,9 @@
                                 <div class="statistic-item">
                                     <span class="statistic-label">选项分布:</span>
                                     <div class="option-distribution">
-                                        {% for opt in item.option_distribution %}
+                                        {% for opt in item.options %}
                                         <div class="distribution-bar">
-                                            <div class="bar-label">{{ opt.option_text }}</div>
-                                            <div class="bar-container">
-                                                <div class="bar-fill" style="width: {{ opt.percentage }}%;"></div>
-                                                <div class="bar-value">{{ opt.count }} ({{ opt.percentage }}%)</div>
-                                            </div>
+                                            <div class="bar-label">{{ opt.text }}  --- {{ opt.count }}次</div>
                                         </div>
                                         {% endfor %}
                                     </div>
