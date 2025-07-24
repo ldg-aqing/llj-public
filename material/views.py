@@ -27,7 +27,7 @@ def upload_material(request, speaker_id, presentation_id):
 
     if request.method == 'POST' and 'file' in request.FILES:
         file = request.FILES.get('file')
-        file_type = request.POST.get('file_type', '').upper()
+        file_type = request.POST.get('file_type', '').strip().lower()  # 👈 转小写
         last_uploaded_file = file.name  # ✅ 保存上传名
 
         # 保存临时文件
