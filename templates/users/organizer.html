@@ -71,7 +71,8 @@
                         {% elif presentation.status == 'LIVE' %}
                         <button class="enter-btn" type="button" onclick="window.location.href='/presentations/during/{{ presentation.id }}/'">进入演讲</button>
                         {% elif presentation.status == 'FINISHED' %}
-                      <a href="/api/feedbacks/report/organizer/{{ presentation.id }}/" class="enter-btn">查看报告</a>
+                                 <a href="{% url 'organizer_after' presentation.id user.id %}" class="enter-btn">查看报告</a>
+
 
                         {% endif %}
                     </div>

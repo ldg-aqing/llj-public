@@ -37,4 +37,7 @@ urlpatterns = [
     path('api/presentations/submit_answer/', submit_answer_api, name='submit_answer_api'),
 
     path('after/audience_after/<int:presentation_id>/<int:user_id>/', views.audience_after_view, name='audience_after'),
+    path('after/speaker_after/<int:presentation_id>/<int:user_id>/', views.speaker_after_view, name='speaker_after'),
+    path('after/organizer_after/<int:presentation_id>/<int:user_id>/', views.organizer_after_view,name='organizer_after'),
 ]
+2
