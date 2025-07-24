@@ -169,9 +169,10 @@ function loadQuestions() {
         let optionsHtml = '';
         (question.options || []).forEach((option, i) => {
             const checked = option.id === selectedOptionId ? 'checked' : '';
+            const disabled = question.status === 'completed' ? 'disabled' : '';
             optionsHtml += `
                 <li class="question-option">
-                    <input type="radio" id="question-${question.id}-option-${i}" name="question-${question.id}" value="${option.id}" data-option-id="${option.id}" class="option-radio" ${checked} />
+                    <input type="radio" id="question-${question.id}-option-${i}" name="question-${question.id}" value="${option.id}" data-option-id="${option.id}" class="option-radio" ${checked} ${disabled} />
                     <label for="question-${question.id}-option-${i}">${option.text}</label>
                 </li>`;
         });
@@ -189,11 +190,11 @@ function loadQuestions() {
             explanationSection = `<div class="question-explanation" style="display: block;"><span class="explanation-label">解析:</span> ${question.explanation}</div>`;
         }
 
-        if (question.status === 'active') {
-            if (!question.user_answer) {
-                actionsHtml = `<div class="question-actions"><button class="action-btn submit-answer-btn" data-question-id="${question.id}">提交答案</button></div>`;
-            }
+
+        if (question.status === 'active' && !question.user_answer) {
+            actionsHtml = `<div class="question-actions"><button class="action-btn submit-answer-btn" data-question-id="${question.id}">提交答案</button></div>`;
         }
+
 
         const html = `
         <div class="single-question-container" data-question-index="${index}" data-question-id="${question.id}">
@@ -413,9 +414,12 @@ function submitAnswer(questionId) {
         fetch(`/presentations/api/presentations/audience_detail/${presentationId}/?user_id=${user_id}`)
             .then(res => res.json())
             .then(data => {
+                // 更新全局数据
                 pageData = data;
-                loadQuestions();  // 重新渲染题目列表
-                showQuestion(currentQuestionIndex);  // 保持在当前题目
+                questions = pageData.questions; // 👈 加这一句，保持全局一致
+                loadQuestions();
+                showQuestion(currentQuestionIndex);  // 保持题目不跳动
+
             })
             .catch(() => {
                 alert('刷新题目失败，请稍后重试');
