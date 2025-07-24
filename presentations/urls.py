@@ -35,4 +35,6 @@ urlpatterns = [
         views.audience_presentation_detail
     ),
     path('api/presentations/submit_answer/', submit_answer_api, name='submit_answer_api'),
+
+    path('after/audience_after/<int:presentation_id>/<int:user_id>/', views.audience_after_view, name='audience_after'),
 ]

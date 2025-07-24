@@ -1,11 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>观众报告 - {{ presentation.title }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .comment-section { margin-top: 10px; margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; }
+        .comment { border-bottom: 1px solid #eee; padding: 5px 0; }
+        .comment:last-child { border-bottom: none; }
+        .feedback-form, .comment-form { margin-top: 10px; }
+        .feedback-item { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
 <h1>观众报告：{{ presentation.title }}</h1>
+
 <h2>公开反馈</h2>
-{% for fb in feedbacks %}
-    <div>
-        类型：{{ fb.get_category_display }}<br>
-        内容：{{ fb.reason }}
-    </div>
-    <hr>
-{% empty %}
-    <p>暂无反馈。</p>
-{% endfor %}
+
+<div id="feedback-list">
+    {% for fb in feedbacks %}
+        <div class="feedback-item">
+            类型：{{ fb.get_category_display }}<br>
+            内容：{{ fb.reason }}
+        </div>
+    {% empty %}
+        <p>暂无反馈。</p>
+    {% endfor %}
+</div>
+
+<div class="feedback-form">
+    <h3>提交反馈</h3>
+    <form id="feedbackForm">
+        <label for="category">反馈类型:</label>
+        <select id="category" name="category" required>
+            <option value="SPEAKER">演讲者</option>
+            <option value="QUIZ">题目</option>
+            <option value="ENVIRONMENT">环境</option>
+        </select><br><br>
+        <label for="reason">反馈内容:</label><br>
+        <textarea id="reason" name="reason" rows="3" cols="50" required></textarea><br><br>
+        <button type="submit">提交反馈</button>
+    </form>
+</div>
+
+<h2>答题情况</h2>
+<table>
+  <thead>
+    <tr>
+      <th>题目</th>
+      <th>选项</th>
+      <th>你的答案</th>
+      <th>正确答案</th>
+      <th>是否正确</th>
+      <th>解析</th>
+      <th>评论</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in quiz_data %}
+    <tr>
+      <td>{{ item.quiz.question }}</td>
+      <td>
+        {% for option in item.options %}
+          {{ option.label }}. {{ option.text }}<br>
+        {% endfor %}
+      </td>
+      <td>{{ item.selected_option_text|default:"未答" }}</td>
+      <td>{{ item.correct_option_text|default:"无" }}</td>
+      <td>
+        {% if item.is_correct == True %}
+          正确
+        {% elif item.is_correct == False %}
+          错误
+        {% else %}
+          未作答
+        {% endif %}
+      </td>
+      <td>{{ item.explanation }}</td>
+      <td style="vertical-align: top;">
+        <div class="comment-section" id="comments-{{ item.quiz.id }}">
+          <strong>评论列表：</strong>
+          <div class="comments-list">
+            {% for comment in item.comments %}
+              <div class="comment">
+                <b>{{ comment.user.username }}</b> ({{ comment.created_at|date:"Y-m-d H:i" }}):<br>
+                {{ comment.content }}
+              </div>
+            {% empty %}
+              <div>暂无评论</div>
+            {% endfor %}
+          </div>
+          <form class="comment-form" data-quiz-id="{{ item.quiz.id }}">
+            <textarea name="content" rows="3" cols="30" placeholder="写评论..." required></textarea><br>
+            <button type="submit">提交评论</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+// 反馈表单提交
+document.getElementById('feedbackForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const category = document.getElementById('category').value;
+    const reason = document.getElementById('reason').value;
+    axios.post('/api/feedbacks/{{ presentation.id }}/', {
+        category: category,
+        reason: reason
+    })
+    .then(response => {
+        alert('反馈提交成功');
+        location.reload();
+    })
+    .catch(error => {
+        alert('反馈提交失败: ' + error.response?.data?.msg || error);
+    });
+});
+
+// 评论表单提交（事件委托）
+document.querySelectorAll('.comment-form').forEach(form => {
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const quizId = this.getAttribute('data-quiz-id');
+        const content = this.querySelector('textarea[name="content"]').value;
+
+        // 假设 user_id 在前端通过登录状态持有，示例这里硬编码为1，实际用你的登录逻辑传入
+        const userId = 1;
+
+        axios.post(`/api/discussions/quiz/${quizId}/comments/post/`, {
+            user_id: userId,
+            content: content
+        })
+        .then(response => {
+            alert('评论提交成功');
+            location.reload();
+        })
+        .catch(error => {
+            alert('评论提交失败: ' + error.response?.data?.msg || error);
+        });
+    });
+});
+</script>
+
+</body>
+</html>
