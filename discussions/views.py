@@ -27,7 +27,6 @@ def get_comments(request, quiz_id):
         except Discussion.DoesNotExist:
             return JsonResponse({'code': 1, 'msg': '该题目没有讨论区'}, status=404)
 
-
 @csrf_exempt
 def post_comment(request, quiz_id):
     if request.method == 'POST':
