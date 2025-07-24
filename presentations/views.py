@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from rest_framework.decorators import  permission_classes
 from rest_framework.permissions import IsAuthenticated
 import logging
@@ -339,7 +340,8 @@ def audience_presentation_detail(request, presentation_id):
                 }
                 for fb in feedbacks
             ],
-            "questions": question_list
+            "questions": question_list,
+
         }
         return Response(data)
     except Presentation.DoesNotExist:
@@ -458,3 +460,20 @@ def audience_after_view(request, presentation_id, user_id):
     }
 
     return render(request, 'presentations/after/audience_afterp.html', context)
+
+
+def end_presentation(request, presentation_id):
+    try:
+        presentation = Presentation.objects.get(id=presentation_id)
+        presentation.status = 'FINISHED'
+        presentation.save()
+        return JsonResponse({
+            'code': 0,
+            'msg': '演讲已结束',
+            'redirect_url': f'/api/feedbacks/report/organizer/{presentation.id}/'
+        })
+
+
+
+    except Presentation.DoesNotExist:
+        return JsonResponse({'code': 1, 'msg': '演讲不存在'})
