@@ -91,7 +91,8 @@
                 } else if (p.status === 'LIVE') {
                     btn = `<button class="enter-btn" disabled>进行中</button>`;
                 } else if (p.status === 'FINISHED') {
-                    btn = `<button class="enter-btn" onclick="window.location.href='/api/feedbacks/report/speaker/${p.id}/'">查看报告</button>`;
+                    btn = `<button class="enter-btn" onclick="window.location.href='/presentations/after/speaker_after/${p.id}/${userId}/'">查看报告</button>`;
+
                 }
 
                 const html = `

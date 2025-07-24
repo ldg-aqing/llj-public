@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import  permission_classes
 from rest_framework.permissions import IsAuthenticated
 import logging
+
 from users.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from presentations.models import Presentation, PresentationAttendee
@@ -108,7 +109,12 @@ def organizer_presentation_list_api(request):
             'status_display': p.get_status_display(),
         })
 
-    return JsonResponse({'code': 0, 'presentations': data})
+    return JsonResponse({
+        'code': 0,
+        'presentations': data,
+        'user_id': user.id  # ✅ 添加这行
+    })
+
 def audience_home(request):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -135,7 +141,6 @@ def audience_presentation_list(request):
     if not user:
         return JsonResponse({'code': 1, 'msg': '无效用户'}, status=403)
 
-    from presentations.models import PresentationAttendee
     entries = PresentationAttendee.objects.filter(attendee=user)
     presentations = [e.presentation for e in entries]
 
@@ -147,7 +152,8 @@ def audience_presentation_list(request):
             'status_display': p.get_status_display()
         } for p in presentations
     ]
-    return JsonResponse({'code': 0, 'presentations': data, 'user_id': user_id})
+    return JsonResponse({'code': 0, 'presentations': data, 'user_id': user.id})  # ✅ 注意补上 user_id
+
 
 def start_presentation(request, pk):
     presentation = get_object_or_404(Presentation, pk=pk)
@@ -661,13 +667,31 @@ def end_presentation(request, presentation_id):
         presentation = Presentation.objects.get(id=presentation_id)
         presentation.status = 'FINISHED'
         presentation.save()
+
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'code': 1, 'msg': '用户未登录'})
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'code': 1, 'msg': '用户不存在'})
+
+        # 根据用户角色跳转到对应的after页面
+        if user.role == 'ORGANIZER':
+            redirect_url = f'/presentations/after/organizer_after/{presentation.id}/{user.id}/'
+        elif user.role == 'SPEAKER':
+            redirect_url = f'/presentations/after/speaker_after/{presentation.id}/{user.id}/'
+        elif user.role == 'AUDIENCE':
+            redirect_url = f'/presentations/after/audience_after/{presentation.id}/{user.id}/'
+        else:
+            redirect_url = '/users/login/'
+
         return JsonResponse({
             'code': 0,
             'msg': '演讲已结束',
-            'redirect_url': f'/api/feedbacks/report/organizer/{presentation.id}/'
+            'redirect_url': redirect_url
         })
-
-
 
     except Presentation.DoesNotExist:
         return JsonResponse({'code': 1, 'msg': '演讲不存在'})

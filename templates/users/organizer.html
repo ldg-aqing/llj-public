@@ -94,6 +94,7 @@
                 .then(res => res.json())
                 .then(data => {
                     const container = document.getElementById('presentationList');
+                    const userId = data.user_id;
                     if (data.code !== 0 || !data.presentations) {
                         container.innerHTML = '<div class="empty-tip">加载失败</div>';
                         return;
@@ -114,7 +115,7 @@
                         } else if (p.status === 'LIVE') {
                             actionBtn = `<button class="enter-btn" onclick="window.location.href='/presentations/during/${p.id}/'">进入演讲</button>`;
                         } else if (p.status === 'FINISHED') {
-                            actionBtn = `<a href="/api/feedbacks/report/organizer/${p.id}/" class="enter-btn">查看报告</a>`;
+                            actionBtn = `<a href="/presentations/after/organizer_after/${p.id}/${userId}/" class="enter-btn">查看报告</a>`;
                         }
 
                         const html = `
