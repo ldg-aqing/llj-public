@@ -67,7 +67,7 @@
                         </div>
 
                         {% if presentation.status == 'PENDING' %}
-                        <button class="enter-btn" type="button" onclick="window.location.href='/presentations/manage/{{ presentation.id }}/'">管理</button>
+                        <button class="enter-btn" type="button" onclick="window.location.href='/presentations/manage/{{ presentation.id }}/'">管理演讲</button>
                         {% elif presentation.status == 'LIVE' %}
                         <button class="enter-btn" type="button" onclick="window.location.href='/presentations/during/{{ presentation.id }}/'">进入演讲</button>
                         {% elif presentation.status == 'FINISHED' %}
