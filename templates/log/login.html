@@ -14,6 +14,20 @@
             object-fit: cover;
             z-index: -1;
         }
+        .error-container {
+    margin: 30px auto;
+    width: 80%;
+    text-align: center;
+}
+
+.error-message {
+    color: red;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size:20px;
+}
+
     </style>
 
     <!-- 添加视频背景 -->
@@ -23,20 +37,8 @@
     </video>
 
 
-     <!--  登录失败提示信息 -->
-    {% if messages %}
-        <script>
-            {% for message in messages %}
-                alert("{{ message|escapejs }}");
-            {% endfor %}
-            // 手动跳转回来
-            window.location.href = "{% url 'login' %}";
-        </script>
-    {% endif %}
-
 
 <head>
-
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,7 +99,7 @@
 
 
         <!-- 登录盒子 -->
-        <form class="login-form" method="post" action="{% url 'login' %}">
+        <div class="login-form"action="{% url 'login' %}">
             <!-- 标题盒子 -->
             <div class="title-box">
                 <h1>登录</h1>
@@ -117,6 +119,14 @@
                 <p onclick="mySwitch()">没有账号?去注册</p>
             </div>
             </form>
+
+                {% if messages %}
+        <div class="error-container">
+            {% for message in messages %}
+                <div class="error-message">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
         </div>
 
        </div>
