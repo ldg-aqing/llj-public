@@ -24,8 +24,7 @@
 <div id="feedback-list">
     {% for fb in feedbacks %}
         <div class="feedback-item">
-            类型：{{ fb.get_category_display }}<br>
-            内容：{{ fb.reason }}
+                 <strong>{{ fb.user.username }}</strong> ：{{ fb.reason }}
         </div>
     {% empty %}
         <p>暂无反馈。</p>
@@ -131,11 +130,12 @@ document.querySelectorAll('.comment-form').forEach(form => {
         const quizId = this.getAttribute('data-quiz-id');
         const content = this.querySelector('textarea[name="content"]').value;
 
-        // 假设 user_id 在前端通过登录状态持有，示例这里硬编码为1，实际用你的登录逻辑传入
-        const userId = 1;
+        if (!content.trim()) {
+            alert('请输入评论内容');
+            return;
+        }
 
         axios.post(`/api/discussions/quiz/${quizId}/comments/post/`, {
-            user_id: userId,
             content: content
         })
         .then(response => {
@@ -143,10 +143,11 @@ document.querySelectorAll('.comment-form').forEach(form => {
             location.reload();
         })
         .catch(error => {
-            alert('评论提交失败: ' + error.response?.data?.msg || error);
+            alert('评论提交失败: ' + (error.response?.data?.msg || error));
         });
     });
 });
+
 </script>
 
 </body>

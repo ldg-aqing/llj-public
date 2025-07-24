@@ -358,9 +358,6 @@ def submit_answer_api(request):
     return Response({'success': True, 'is_correct': session.is_correct ,
                      'selected_option_id': option.id,})
 
-
-
-
 def audience_after_view(request, presentation_id, user_id):
     # 获取演讲对象
     presentation = get_object_or_404(Presentation, id=presentation_id)
@@ -433,6 +430,6 @@ def audience_after_view(request, presentation_id, user_id):
         'presentation': presentation,
         'feedbacks': feedbacks,
         'quiz_data': quiz_data,
+        'user_id': request.user.id if request.user.is_authenticated else None,
     }
-
     return render(request, 'presentations/after/audience_afterp.html', context)
