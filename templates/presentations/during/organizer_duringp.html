@@ -62,6 +62,9 @@
             onclick="autoGenerateQuiz({{ presentation.id }})">
         AI自动出题
     </button>
+    <button id="endPresentationBtn" class="action-btn generate-btn" style="margin-bottom:16px;">
+        结束演讲
+    </button>
     <div class="question-list" id="questionList">
         <div class="empty-tip">正在加载题目数据...</div>
     </div>
@@ -365,7 +368,31 @@ function loadFeedbacks() {
         });
 }
 
+document.getElementById('endPresentationBtn').addEventListener('click', function () {
+    if (!confirm("确定要结束演讲吗？")) return;
 
+    const csrftoken = getCookie('csrftoken');
+    const presentationId = "{{ presentation.id }}";
+
+    fetch(`/presentations/end/${presentationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.code === 0 && data.redirect_url) {
+             window.location.href = data.redirect_url;
+
+        } else {
+            alert(data.msg || '操作失败');
+        }
+    })
+    .catch(() => {
+        alert('请求失败，请检查网络或稍后重试');
+    });
+});
 
     </script>
 </body>
