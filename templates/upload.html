@@ -1,85 +1,132 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <title>上传素材</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/organizer_beforep.css' %}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-        }
-
-        body {
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        /* 新增的上传页面特定样式 */
+        .upload-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(74, 107, 255, 0.1);
             overflow: hidden;
         }
 
-        /* 上传表单区域 - 严格按图片样式 */
-        .upload-form {
-            padding: 30px;
-        }
-
-        .upload-title {
-            font-size: 18px;
-            color: #333;
-            text-align: center;
-            margin-bottom: 25px;
-            font-weight: normal;
-        }
-
-        .form-row {
-            margin-bottom: 20px;
+        .upload-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid rgba(234, 234, 234, 0.7);
             display: flex;
             align-items: center;
         }
 
-        .form-label {
-            width: 80px;
-            font-size: 14px;
+        .back-btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%);
+            border: none;
+            color: #4A6BFF;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(74, 107, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(74, 107, 255, 0.3);
+        }
+
+        .upload-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.8rem;
             color: #333;
-        }
-
-        .text-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .file-input-container {
-            flex: 1;
+            margin-bottom: 30px;
+            text-align: center;
             position: relative;
         }
 
+        .upload-title::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #4A6BFF 0%, #8A2BE2 100%);
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+
+        .upload-form {
+            padding: 30px 40px;
+        }
+
+        .form-row {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(74, 107, 255, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #4A6BFF;
+            box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.1);
+        }
+
+        .file-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
         .file-input-button {
-            display: inline-block;
-            padding: 8px 15px;
-            background-color: #f0f0f0;
-            color: #333;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, rgba(74, 107, 255, 0.1) 0%, rgba(74, 107, 255, 0.05) 100%);
+            color: #4A6BFF;
+            border: 1px dashed rgba(74, 107, 255, 0.3);
+            border-radius: 8px;
+            font-size: 1rem;
             cursor: pointer;
-            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-input-button:hover {
+            background: linear-gradient(135deg, rgba(74, 107, 255, 0.15) 0%, rgba(74, 107, 255, 0.1) 100%);
+            border-color: rgba(74, 107, 255, 0.5);
         }
 
         .file-input-hint {
-            font-size: 12px;
-            color: #999;
-            margin-left: 10px;
-            display: inline-block;
+            font-size: 0.9rem;
+            color: #888;
+            margin-left: 15px;
         }
 
         #file-input {
@@ -94,79 +141,71 @@
 
         .submit-btn {
             display: block;
-            width: 120px;
-            margin: 25px auto 0;
-            padding: 8px 0;
-            background-color: #f0f0f0;
-            color: #333;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        /* 以下保持原有功能区域不变 */
-        .header {
+            width: 100%;
             padding: 15px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-        }
-
-        .back-btn {
-            background: none;
+            background: linear-gradient(135deg, #4A6BFF 0%, #8A2BE2 100%);
+            color: white;
             border: none;
-            color: #333;
-            font-size: 16px;
-            margin-right: 15px;
-            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            display: flex;
-            align-items: center;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(74, 107, 255, 0.3);
         }
 
-        .presentation-info {
-            flex: 1;
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(74, 107, 255, 0.4);
         }
-
-        .info-item {
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .info-label { color: #666; display: inline-block; width: 80px; }
-        .info-value { color: #333; font-weight: 500; }
 
         .content-list {
-            padding: 15px;
+            padding: 30px;
+            border-top: 1px solid rgba(234, 234, 234, 0.7);
         }
 
         .list-title {
-            font-size: 15px;
-            color: #666;
-            margin-bottom: 15px;
-            padding-left: 5px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
         }
 
-        .empty-tip {
-            text-align: center;
-            color: #999;
-            padding: 30px 0;
-            font-size: 14px;
+        .list-title::before {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 24px;
+            background: #4A6BFF;
+            margin-right: 12px;
+            border-radius: 3px;
         }
 
         .content-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            border: 1px solid #eee;
-            border-radius: 5px;
+            padding: 14px 18px;
             margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            border: 1px solid rgba(74, 107, 255, 0.1);
+            transition: all 0.3s ease;
         }
 
-        .content-name { font-size: 15px; color: #333; }
+        .content-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 107, 255, 0.1);
+        }
+
+        .content-name {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
 
         .content-actions {
             display: flex;
@@ -174,53 +213,132 @@
         }
 
         .view-btn, .delete-btn {
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
             cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
+
+        .view-btn {
+            background: rgba(74, 107, 255, 0.1);
+            color: #4A6BFF;
+            border: 1px solid rgba(74, 107, 255, 0.2);
+        }
+
+        .view-btn:hover {
+            background: rgba(74, 107, 255, 0.2);
+        }
+
+        .delete-btn {
+            background: rgba(234, 67, 53, 0.1);
+            color: #ea4335;
+            border: 1px solid rgba(234, 67, 53, 0.2);
+        }
+
+        .delete-btn:hover {
+            background: rgba(234, 67, 53, 0.2);
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: #999;
+            padding: 30px 0;
+            font-size: 1rem;
+            font-style: italic;
+        }
+
+        .text-input, select.text-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid rgba(74, 107, 255, 0.2);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    appearance: none; /* 移除默认下拉箭头 */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234A6BFF'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+}
+
+select.text-input:focus {
+    outline: none;
+    border-color: #4A6BFF;
+    box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.1);
+}
     </style>
 </head>
 <body>
+
     <div class="container">
-        <!-- 返回按钮 + 演讲信息 -->
-        <div class="header">
-            <button class="back-btn" onclick="window.location.href='/presentations/speaker/'">← 返回演讲者主页</button>
+     <!-- 演讲信息区域 -->
+        <div class="presentation-info">
+ <button class="home-button" onclick="window.location.href='/presentations/speaker/'">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+        </svg>
+        <span>返回主页</span>
+    </button>
+            <h1 class="presentation-title" id="presentationTitle">{{ presentation.title }}</h1>
+            <div class="presentation-meta">
+                <div class="meta-item">
+                    <span class="meta-label">组织者:</span>
+                    <span id="organizerName">{{ organizer }}</span>
+                </div>
+                                <div class="meta-item">
+                    <span class="meta-label">演讲者:</span>
+                    <span id="organizerName">{{ speaker }}</span>
+                </div>
+            </div>
         </div>
 
-        <!-- 严格按图片样式的上传表单 -->
+        <!-- 上传表单 -->
         <div class="upload-form">
-            <h2 class="upload-title">上传文件（PDF / PPTX ）</h2>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
+            <h2 class="upload-title">上传演讲素材</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
 
+                <div class="form-row">
+    <label class="form-label">文件类型:</label>
+    <select name="file_type" class="text-input" required>
+        <option value="" disabled selected>请选择文件类型</option>
+        <option value="pptx">PPTX</option>
+        <option value="pdf">PDF</option>
+        <option value="txt">TXT</option>
+    </select>
+</div>
 
-    <div class="form-row">
-        <label class="form-label">File:</label>
-        <div class="file-input-container">
-            <span class="file-input-button">选择文件</span>
-            <span class="file-input-hint">未选择文件</span>
-            <input type="file" id="file-input" name="file" accept=".pdf,.pptx,.txt">
-        </div>
-    </div>
+                <div class="form-row">
+                    <label class="form-label">选择文件:</label>
+                    <div class="file-input-container">
+                        <span class="file-input-button">
+                            <svg viewBox="0 0 24 24" width="18" height="18" style="margin-right: 8px;">
+                                <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"></path>
+                            </svg>
+                            选择文件
+                        </span>
+                        <span class="file-input-hint">未选择文件</span>
+                        <input type="file" id="file-input" name="file" accept=".pdf,.pptx,.txt">
+                    </div>
+                </div>
 
-    <div class="form-row">
-        <label class="form-label">File type:</label>
-        <input type="text" name="file_type" class="text-input">
-    </div>
+                <input type="hidden" name="speaker_id" value="{{ speaker_id }}">
+                <input type="hidden" name="presentation_id" value="{{ presentation_id }}">
 
-<input type="hidden" name="speaker_id" value="{{ speaker_id }}">
-<input type="hidden" name="presentation_id" value="{{ presentation_id }}">
-
-
-    <button type="submit" class="submit-btn">上传</button>
-</form>
-
+                <button type="submit" class="submit-btn">上传文件</button>
+            </form>
         </div>
 
         <!-- 内容列表区 -->
         <div class="content-list">
-            <div class="list-title">已上传内容列表</div>
+            <h3 class="list-title">已上传内容</h3>
 
             {% if materials %}
                 <div id="contentItems">
@@ -228,7 +346,6 @@
                     <div class="content-item">
                         <span class="content-name">{{ item.file_path }}</span>
                         <div class="content-actions">
-                            <!-- 可加查看提取内容 -->
                             <button class="view-btn" onclick="alert(`{{ item.content|escapejs }}`)">查看内容</button>
                             <form method="post" style="display:inline;">
                                 {% csrf_token %}
@@ -243,30 +360,14 @@
                 <div class="empty-tip" id="emptyTip">暂无上传内容</div>
             {% endif %}
         </div>
-
-
     </div>
 
     <script>
-        // 模拟从后端获取演讲信息
-        document.addEventListener('DOMContentLoaded', function() {
-            const presentationData = {
-                name: "人工智能前沿技术分享",
-                speaker: "张教授",
-                organizer: "王助理",
-                audience: 42,
-                status: "未开始"
-            };
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.getElementById('file-input');
+            const hint = document.querySelector('.file-input-hint');
 
-            document.getElementById('presentation-name').textContent = presentationData.name;
-            document.getElementById('presentation-speaker').textContent = presentationData.speaker;
-            document.getElementById('presentation-organizer').textContent = presentationData.organizer;
-            document.getElementById('presentation-audience').textContent = presentationData.audience + '人';
-            document.getElementById('presentation-status').textContent = presentationData.status;
-
-            // 文件选择显示
-            document.getElementById('file-input').addEventListener('change', function(e) {
-                const hint = document.querySelector('.file-input-hint');
+            fileInput.addEventListener('change', function () {
                 if (this.files.length > 0) {
                     hint.textContent = this.files[0].name;
                 } else {
@@ -274,37 +375,6 @@
                 }
             });
         });
-
-        function addNewContent(contentName) {
-            const emptyTip = document.getElementById('emptyTip');
-            if (emptyTip) emptyTip.style.display = 'none';
-
-            const contentItems = document.getElementById('contentItems');
-            const newItem = document.createElement('div');
-            newItem.className = 'content-item';
-            newItem.innerHTML = `
-                <span class="content-name">${contentName}</span>
-                <div class="content-actions">
-                    <button class="view-btn">查看</button>
-                    <button class="delete-btn">删除</button>
-                </div>
-            `;
-
-            newItem.querySelector('.delete-btn').addEventListener('click', function() {
-                if (confirm('确定删除此内容？')) {
-                    newItem.remove();
-                    if (document.querySelectorAll('.content-item').length === 0) {
-                        document.getElementById('emptyTip').style.display = 'block';
-                    }
-                }
-            });
-
-            newItem.querySelector('.view-btn').addEventListener('click', function() {
-                alert('查看内容: ' + contentName);
-            });
-
-            contentItems.appendChild(newItem);
-        }
     </script>
 </body>
 </html>
