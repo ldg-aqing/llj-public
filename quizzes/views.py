@@ -115,7 +115,8 @@ def quiz_statistics(request, presentation_id):
                 "count": option_count_map.get(opt.id, 0)
             })
 
-        accuracy = round(correct_answers / total_answers, 2) if total_answers > 0 else None
+        accuracy = round(correct_answers / total_answers * 100, 2) if total_answers > 0 else None
+
         if accuracy is not None:
             total_accuracy += accuracy
             count_with_answers += 1

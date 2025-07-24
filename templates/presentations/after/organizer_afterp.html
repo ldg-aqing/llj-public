@@ -1,12 +1,135 @@
-<h1>组织者报告：{{ presentation.title }}</h1>
-<h2>全部反馈（含敏感内容和统计）</h2>
-{% for fb in feedbacks %}
-    <div>
-        <b>{{ fb.user.username }}</b>（{{ fb.submitted_at|date:"Y-m-d H:i" }})<br>
-        类型：{{ fb.get_category_display }}<br>
-        内容：{{ fb.reason }}
-    </div>
-    <hr>
-{% empty %}
-    <p>暂无反馈。</p>
-{% endfor %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+{% load static %}
+<head>
+    <meta charset="UTF-8" />
+    <title>组织者报告 - {{ presentation.title }}</title>
+    <link rel="stylesheet" href="{% static 'css/audience_duringp.css' %}">
+</head>
+<style>/* 反馈表单样式 */
+.feedback-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.feedback-type-select {
+
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid rgba(74, 107, 255, 0.2);
+    border-radius: 8px;
+    background-color: white;
+    font-size: 14px;
+    color: #333;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}
+
+.feedback-content-input {
+    width: 700px;
+    flex: 3;
+    padding: 12px 18px;
+    border: 1px solid rgba(74, 107, 255, 0.2);
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+
+.feedback-submit-btn {
+    padding: 12px 24px;
+    background: #4A6BFF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(74, 107, 255, 0.2);
+}
+
+.feedback-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 107, 255, 0.3);
+}
+</style>
+<body>
+<div class="container">
+    <button onclick="window.location.href='/presentations/organizer/';">返回主页</button>
+
+    <h1>组织者报告：{{ presentation.title }}</h1>
+    <p>组织者：{{ presentation.organizer.username }}</p>
+    <p>演讲者：{{ presentation.speaker.username }}</p>
+
+    <h2>听众反馈</h2>
+    <ul class="feedback-list">
+        {% for fb in feedbacks %}
+        <li>
+            <strong>{{ fb.get_category_display }}：</strong>{{ fb.reason }}
+            <br>
+            提交人：{{ fb.user.username }} | 时间：{{ fb.created_at|date:"Y-m-d H:i" }}
+        </li>
+        {% empty %}
+        <li>暂无反馈</li>
+        {% endfor %}
+    </ul>
+
+    <h2>总体答题情况</h2>
+    <p>平均正确率：
+        {% if average_accuracy != None %}
+            {{ average_accuracy|floatformat:2 }}%
+        {% else %}
+            暂无数据
+        {% endif %}
+    </p>
+
+    <h2>题目答题情况</h2>
+    {% if quiz_stats %}
+    <ul>
+        {% for item in quiz_stats %}
+        <li>
+            <strong>题目：</strong> {{ item.quiz.question }}<br>
+            <strong>总答题数：</strong> {{ item.total_answers }} &nbsp;&nbsp;
+            <strong>正确数：</strong> {{ item.correct_answers }} &nbsp;&nbsp;
+            <strong>正确率：</strong>
+            {% if item.accuracy != None %}
+                {{ item.accuracy|floatformat:2 }}%
+            {% else %}
+                暂无数据
+            {% endif %}
+            <br>
+            <strong>选项统计：</strong>
+            <ul>
+                {% for opt in item.options %}
+                <li>{{ opt.label }}. {{ opt.text }} - 被选次数: {{ opt.count }}</li>
+                {% endfor %}
+            </ul>
+            <strong>正确答案：</strong> {{ item.correct_option_text }}<br>
+            <strong>评论区：</strong>
+            <ul class="discussion-list">
+                {% for comment in item.comments %}
+                <li>
+                    <div><b>{{ comment.user.username }}</b> ({{ comment.created_at|date:"Y-m-d H:i" }}):</div>
+                    <div>{{ comment.content }}</div>
+                </li>
+                {% empty %}
+                <li>暂无评论</li>
+                {% endfor %}
+            </ul>
+
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>暂无题目统计</p>
+    {% endif %}
+</div>
+</body>
+</html>
