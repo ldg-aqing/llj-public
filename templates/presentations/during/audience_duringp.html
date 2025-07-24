@@ -283,6 +283,7 @@ function submitComment(quizId) {
     .then(res => res.json())
     .then(data => {
         if (data.code === 0) {
+             alert('评论提交成功');
             input.value = '';
             loadCommentsForQuestion(quizId);
         } else {
