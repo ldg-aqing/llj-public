@@ -46,3 +46,4 @@ urlpatterns = [
     path('end/<int:presentation_id>/', views.end_presentation, name='end_presentation'),
 
 ]
+2

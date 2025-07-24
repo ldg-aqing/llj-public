@@ -528,7 +528,8 @@ def audience_after_view(request, presentation_id, user_id):
 def speaker_after_view(request, presentation_id, user_id):
     presentation = get_object_or_404(Presentation, id=presentation_id)
     user = get_object_or_404(User, id=user_id)
-
+    attendees = PresentationAttendee.objects.filter(presentation=presentation)
+    allfeedbacks = presentation.feedback_set.filter(presentation=presentation)
     feedbacks = presentation.feedback_set.all()
     quizzes = Quiz.objects.filter(presentation=presentation).order_by('id')
 
@@ -578,11 +579,14 @@ def speaker_after_view(request, presentation_id, user_id):
             'accuracy': accuracy,
             'correct_option_text': correct_option_text,
             'comments': comments,
+
         })
 
     average_accuracy = (total_accuracy / count_with_answers) if count_with_answers > 0 else None
 
     context = {
+        'allfeedbacks':allfeedbacks,
+        'attendees':attendees,
         'presentation': presentation,
         'feedbacks': feedbacks,
         'quiz_stats': quiz_stats,
@@ -594,72 +598,74 @@ def speaker_after_view(request, presentation_id, user_id):
 
 def organizer_after_view(request, presentation_id, user_id):
     presentation = get_object_or_404(Presentation, id=presentation_id)
+    user = get_object_or_404(User, id=user_id)
+    attendees = PresentationAttendee.objects.filter(presentation=presentation)
+    allfeedbacks = presentation.feedback_set.filter(presentation=presentation)
+    feedbacks = presentation.feedback_set.all()
+    quizzes = Quiz.objects.filter(presentation=presentation).order_by('id')
 
-    # 获取反馈
-    feedbacks = Feedback.objects.filter(presentation=presentation).order_by('-submitted_at')
-
-    # 获取题目
-    quizzes = Quiz.objects.filter(presentation=presentation)
-
-    # 计算答题统计
-    quiz_stats = []
     total_accuracy = 0
     count_with_answers = 0
+    quiz_stats = []
+
     for quiz in quizzes:
         sessions = QuizSession.objects.filter(quiz=quiz)
         total_answers = sessions.count()
         correct_answers = sessions.filter(is_correct=True).count()
 
-        # 统计选项被选次数
         option_stats = sessions.values('selected_option__id').annotate(count=Count('id'))
         option_count_map = {stat['selected_option__id']: stat['count'] for stat in option_stats}
 
-        options_result = []
-        options = quiz.options.all()
+        options = QuizOption.objects.filter(quiz=quiz).order_by('id')
+        option_list = []
         for i, opt in enumerate(options):
             label = chr(65 + i)
-            options_result.append({
+            option_list.append({
                 'label': label,
                 'text': opt.option_text,
                 'count': option_count_map.get(opt.id, 0)
             })
 
-        accuracy = round((correct_answers / total_answers) * 100, 2) if total_answers > 0 else None
+        accuracy = (correct_answers / total_answers * 100) if total_answers > 0 else None
         if accuracy is not None:
             total_accuracy += accuracy
             count_with_answers += 1
 
-        # 查询评论
+        correct_option_text = ""
+        if quiz.correct_option:
+            correct_option_text = quiz.correct_option.option_text
+
+        # 关联讨论和评论
         try:
             discussion = Discussion.objects.get(quiz=quiz)
             comments = Comment.objects.filter(discussion=discussion).order_by('created_at')
         except Discussion.DoesNotExist:
             comments = []
 
-        # 取正确答案文字
-        correct_option_text = ''
-        if quiz.correct_option:
-            correct_option_text = quiz.correct_option.option_text
-
         quiz_stats.append({
             'quiz': quiz,
+            'options': option_list,
             'total_answers': total_answers,
             'correct_answers': correct_answers,
             'accuracy': accuracy,
-            'options': options_result,
-            'comments': comments,
             'correct_option_text': correct_option_text,
+            'comments': comments,
+
         })
 
-    average_accuracy = round(total_accuracy / count_with_answers, 2) if count_with_answers > 0 else None
+    average_accuracy = (total_accuracy / count_with_answers) if count_with_answers > 0 else None
 
     context = {
+        'allfeedbacks':allfeedbacks,
+        'attendees':attendees,
         'presentation': presentation,
         'feedbacks': feedbacks,
         'quiz_stats': quiz_stats,
         'average_accuracy': average_accuracy,
     }
+
     return render(request, 'presentations/after/organizer_afterp.html', context)
+
 
 
 def end_presentation(request, presentation_id):
